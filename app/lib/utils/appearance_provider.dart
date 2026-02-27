@@ -1,4 +1,4 @@
-import 'package:anilist_client/utils/appearance_theme.dart';
+import 'package:anitrack/utils/appearance_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -79,3 +79,4 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
 final appearanceProvider = StateNotifierProvider<AppearanceNotifier, AppearanceState>(
   (ref) => AppearanceNotifier(),
 );
+

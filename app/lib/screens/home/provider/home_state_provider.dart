@@ -1,10 +1,10 @@
 // get the current animes and split them into 2 groups one releasing and the finished ones.
 
-import 'package:anilist_client/models/collection_model.dart';
-import 'package:anilist_client/models/media_model.dart';
-import 'package:anilist_client/utils/api_service.dart';
-import 'package:anilist_client/utils/auth_provider.dart';
-import 'package:anilist_client/utils/graphql.dart';
+import 'package:anitrack/models/collection_model.dart';
+import 'package:anitrack/models/media_model.dart';
+import 'package:anitrack/utils/api_service.dart';
+import 'package:anitrack/utils/auth_provider.dart';
+import 'package:anitrack/utils/graphql.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final currentAnimesProvider = FutureProvider((ref) async {
@@ -270,3 +270,4 @@ extension CurrentMangaFeedViewState on CurrentMangaFeedState {
   bool get hasLoadedAnything =>
       releasingEntries.isNotEmpty || finishedEntries.isNotEmpty;
 }
+

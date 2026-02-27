@@ -1,6 +1,6 @@
-import 'package:anilist_client/utils/api_service.dart';
-import 'package:anilist_client/utils/auth_provider.dart';
-import 'package:anilist_client/utils/graphql.dart';
+import 'package:anitrack/utils/api_service.dart';
+import 'package:anitrack/utils/auth_provider.dart';
+import 'package:anitrack/utils/graphql.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final recentActivitiesProvider = FutureProvider<List<Map<String, dynamic>>>(
@@ -21,3 +21,4 @@ final recentActivitiesProvider = FutureProvider<List<Map<String, dynamic>>>(
         .toList(growable: false);
   },
 );
+

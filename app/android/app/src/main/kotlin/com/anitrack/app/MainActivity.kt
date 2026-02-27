@@ -1,5 +1,7 @@
-package com.example.anilist_client
+package com.anitrack.app
 
 import io.flutter.embedding.android.FlutterActivity
 
 class MainActivity : FlutterActivity()
+
+

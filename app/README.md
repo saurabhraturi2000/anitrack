@@ -1,4 +1,4 @@
-# anilist_client
+# anitrack
 
 A new Flutter project.
 
@@ -27,3 +27,4 @@ the `lib/src/localization` directory.
 
 To support additional languages, please visit the tutorial on
 [Internationalizing Flutter apps](https://flutter.dev/to/internationalization).
+

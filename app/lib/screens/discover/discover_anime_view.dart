@@ -1,11 +1,11 @@
-import 'package:anilist_client/screens/discover/providers/discover_state_provider.dart';
-import 'package:anilist_client/widgets/custom_headline.dart';
-import 'package:anilist_client/screens/discover/widgets/carousel_section.dart';
-import 'package:anilist_client/screens/discover/widgets/categories_section.dart';
-import 'package:anilist_client/screens/discover/widgets/popular_section.dart';
-import 'package:anilist_client/screens/discover/widgets/upcoming_section.dart';
-import 'package:anilist_client/utils/app_colors.dart';
-import 'package:anilist_client/utils/routes.dart';
+import 'package:anitrack/screens/discover/providers/discover_state_provider.dart';
+import 'package:anitrack/widgets/custom_headline.dart';
+import 'package:anitrack/screens/discover/widgets/carousel_section.dart';
+import 'package:anitrack/screens/discover/widgets/categories_section.dart';
+import 'package:anitrack/screens/discover/widgets/popular_section.dart';
+import 'package:anitrack/screens/discover/widgets/upcoming_section.dart';
+import 'package:anitrack/utils/app_colors.dart';
+import 'package:anitrack/utils/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -152,3 +152,4 @@ class _ActionButton extends StatelessWidget {
     );
   }
 }
+

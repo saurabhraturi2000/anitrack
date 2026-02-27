@@ -26,7 +26,7 @@ class AniListOAuth {
 
   static const String clientId = '24352';
   static const String callbackUrlScheme = 'app';
-  static const String _redirectUri = 'app://anisync/auth';
+  static const String _redirectUri = 'app://anitrack/auth';
 
   static Future<AniListOAuthCredentials> login() async {
     final state = _randomState();
@@ -74,3 +74,4 @@ class AniListOAuth {
     ).join();
   }
 }
+

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:anilist_client/utils/app_colors.dart';
+import 'package:anitrack/utils/app_colors.dart';
 
 class CategoriesSection extends StatelessWidget {
   const CategoriesSection({
@@ -114,3 +114,4 @@ class CategoriesSection extends StatelessWidget {
     );
   }
 }
+

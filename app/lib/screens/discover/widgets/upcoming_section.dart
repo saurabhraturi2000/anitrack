@@ -1,5 +1,5 @@
-import 'package:anilist_client/models/media_model.dart';
-import 'package:anilist_client/widgets/vertical_anime_card.dart';
+import 'package:anitrack/models/media_model.dart';
+import 'package:anitrack/widgets/vertical_anime_card.dart';
 import 'package:flutter/material.dart';
 
 class UpcomingSection extends StatefulWidget {
@@ -28,3 +28,4 @@ class _UpcomingSectionState extends State<UpcomingSection> {
     );
   }
 }
+

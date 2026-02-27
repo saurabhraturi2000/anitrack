@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="Anysync"
+        android:label="anitrack"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round">
@@ -31,7 +31,7 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data
                     android:scheme="app"
-                    android:host="anisync"
+                    android:host="anitrack"
                     android:pathPrefix="/auth"/>
             </intent-filter>
         </activity>
@@ -53,3 +53,4 @@
         </intent>
     </queries>
 </manifest>
+

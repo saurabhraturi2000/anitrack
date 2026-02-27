@@ -1,6 +1,6 @@
-import 'package:anilist_client/screens/auth/login_screen.dart';
-import 'package:anilist_client/utils/app_colors.dart';
-import 'package:anilist_client/utils/auth_provider.dart';
+import 'package:anitrack/screens/auth/login_screen.dart';
+import 'package:anitrack/utils/app_colors.dart';
+import 'package:anitrack/utils/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -173,3 +173,4 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 }
+

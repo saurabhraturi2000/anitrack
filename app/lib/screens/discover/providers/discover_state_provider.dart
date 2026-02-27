@@ -1,6 +1,6 @@
-import 'package:anilist_client/models/media_model.dart';
-import 'package:anilist_client/utils/api_service.dart';
-import 'package:anilist_client/utils/graphql.dart';
+import 'package:anitrack/models/media_model.dart';
+import 'package:anitrack/utils/api_service.dart';
+import 'package:anitrack/utils/graphql.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final discoverAnimeProvider = FutureProvider((ref) async {
@@ -70,3 +70,4 @@ String _seasonForMonth(int month) {
       return ('WINTER', now.year + 1);
   }
 }
+

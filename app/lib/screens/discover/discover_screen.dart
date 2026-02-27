@@ -1,7 +1,7 @@
-import 'package:anilist_client/screens/discover/discover_anime_view.dart';
-import 'package:anilist_client/screens/discover/discover_manga_view.dart';
-import 'package:anilist_client/utils/app_colors.dart';
-import 'package:anilist_client/utils/routes.dart';
+import 'package:anitrack/screens/discover/discover_anime_view.dart';
+import 'package:anitrack/screens/discover/discover_manga_view.dart';
+import 'package:anitrack/utils/app_colors.dart';
+import 'package:anitrack/utils/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -72,3 +72,4 @@ class DiscoverScreen extends StatelessWidget {
     );
   }
 }
+

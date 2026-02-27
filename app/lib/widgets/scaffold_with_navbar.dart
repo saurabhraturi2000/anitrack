@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:anilist_client/utils/app_colors.dart';
-import 'package:anilist_client/utils/auth_provider.dart';
+import 'package:anitrack/utils/app_colors.dart';
+import 'package:anitrack/utils/auth_provider.dart';
 
 class ScaffoldWithNavBar extends ConsumerStatefulWidget {
   final Widget child;
@@ -179,3 +179,4 @@ class _NavItem {
   final String label;
   final String route;
 }
+

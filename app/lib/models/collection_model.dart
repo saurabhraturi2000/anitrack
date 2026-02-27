@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:anilist_client/models/media_model.dart';
+import 'package:anitrack/models/media_model.dart';
 
 CollectionModel collectionModelFromJson(String str) =>
     CollectionModel.fromJson(json.decode(str));
@@ -109,3 +109,4 @@ class Entry {
         "progress": progress,
       };
 }
+

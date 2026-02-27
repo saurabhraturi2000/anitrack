@@ -1,4 +1,4 @@
-import 'package:anilist_client/models/media_model.dart';
+import 'package:anitrack/models/media_model.dart';
 import 'package:flutter/material.dart';
 
 class VerticalAnimeCard extends StatelessWidget {
@@ -137,3 +137,4 @@ class VerticalAnimeCard extends StatelessWidget {
     );
   }
 }
+

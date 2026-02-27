@@ -1,4 +1,4 @@
-import 'package:anilist_client/utils/app_colors.dart';
+import 'package:anitrack/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -187,3 +187,4 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 }
+

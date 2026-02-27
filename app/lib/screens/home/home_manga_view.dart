@@ -1,5 +1,5 @@
-import 'package:anilist_client/screens/home/provider/home_state_provider.dart';
-import 'package:anilist_client/screens/home/widgets/home_anime_card.dart';
+import 'package:anitrack/screens/home/provider/home_state_provider.dart';
+import 'package:anitrack/screens/home/widgets/home_anime_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -136,3 +136,4 @@ class _CurrentMangaViewState extends ConsumerState<CurrentMangaView> {
     );
   }
 }
+

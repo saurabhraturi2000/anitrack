@@ -1,4 +1,4 @@
-import 'package:anilist_client/utils/appearance_theme.dart';
+import 'package:anitrack/utils/appearance_theme.dart';
 import 'package:flutter/material.dart';
 
 class AppColors {
@@ -9,3 +9,4 @@ class AppColors {
         AppThemeFactory.paletteFor(AppStyle.anilist, Brightness.dark);
   }
 }
+

@@ -1,4 +1,4 @@
-import 'package:anilist_client/models/media_model.dart';
+import 'package:anitrack/models/media_model.dart';
 import 'package:flutter/material.dart';
 
 class CarouselSection extends StatefulWidget {
@@ -100,3 +100,4 @@ class _CarouselSectionState extends State<CarouselSection> {
     );
   }
 }
+

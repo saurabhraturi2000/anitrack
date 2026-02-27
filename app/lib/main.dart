@@ -1,6 +1,6 @@
-import 'package:anilist_client/utils/routes.dart';
-import 'package:anilist_client/utils/appearance_provider.dart';
-import 'package:anilist_client/utils/appearance_theme.dart';
+import 'package:anitrack/utils/routes.dart';
+import 'package:anitrack/utils/appearance_provider.dart';
+import 'package:anitrack/utils/appearance_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +20,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Anysync',
+      title: 'anitrack',
       theme: AppThemeFactory.buildTheme(
         style: appearance.style,
         brightness: Brightness.light,
@@ -46,3 +46,5 @@ class MyApp extends ConsumerWidget {
     );
   }
 }
+
+

@@ -1,14 +1,14 @@
 import 'dart:developer';
 
-import 'package:anilist_client/screens/profile/profile_screen.dart';
-import 'package:anilist_client/utils/auth_provider.dart';
-import 'package:anilist_client/widgets/scaffold_with_navbar.dart';
-import 'package:anilist_client/screens/auth/login_screen.dart';
-import 'package:anilist_client/screens/discover/discover_screen.dart';
-import 'package:anilist_client/screens/discover/search_screen.dart';
-import 'package:anilist_client/screens/home/home_screen.dart';
-import 'package:anilist_client/screens/settings/appearance_screen.dart';
-import 'package:anilist_client/screens/settings/settings_screen.dart';
+import 'package:anitrack/screens/profile/profile_screen.dart';
+import 'package:anitrack/utils/auth_provider.dart';
+import 'package:anitrack/widgets/scaffold_with_navbar.dart';
+import 'package:anitrack/screens/auth/login_screen.dart';
+import 'package:anitrack/screens/discover/discover_screen.dart';
+import 'package:anitrack/screens/discover/search_screen.dart';
+import 'package:anitrack/screens/home/home_screen.dart';
+import 'package:anitrack/screens/settings/appearance_screen.dart';
+import 'package:anitrack/screens/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -329,3 +329,4 @@ class ConfirmationDialog extends StatelessWidget {
     );
   }
 }
+

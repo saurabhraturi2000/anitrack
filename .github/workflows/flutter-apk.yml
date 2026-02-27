@@ -17,6 +17,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: app
 
     steps:
       - name: Checkout
@@ -34,7 +37,7 @@ jobs:
           flutter-version: "3.41.1"
           channel: "stable"
           cache: true
-          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('app/pubspec.lock') }}"
 
       - name: Install dependencies
         run: flutter pub get --enforce-lockfile

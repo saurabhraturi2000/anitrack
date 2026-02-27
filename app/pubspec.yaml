@@ -1,4 +1,4 @@
-name: anilist_client
+name: anitrack
 description: "A new Flutter project."
 
 # Prevent accidental publishing to pub.dev.
@@ -50,3 +50,4 @@ flutter:
     - family: Poppins
       fonts:
         - asset: assets/fonts/Poppins-Regular.ttf
+

@@ -1,5 +1,5 @@
-import 'package:anilist_client/screens/home/provider/activity_state_provider.dart';
-import 'package:anilist_client/utils/app_colors.dart';
+import 'package:anitrack/screens/home/provider/activity_state_provider.dart';
+import 'package:anitrack/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -221,3 +221,4 @@ class _ParsedActivity {
   final String? imageUrl;
   final IconData fallbackIcon;
 }
+

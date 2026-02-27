@@ -1,5 +1,5 @@
-import 'package:anilist_client/models/collection_model.dart';
-import 'package:anilist_client/utils/app_colors.dart';
+import 'package:anitrack/models/collection_model.dart';
+import 'package:anitrack/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class HomeAnimeCard extends StatelessWidget {
@@ -231,3 +231,4 @@ class HomeAnimeCard extends StatelessWidget {
     return '${date.day} $month, $hour12:$minute $period';
   }
 }
+
