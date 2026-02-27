@@ -88,6 +88,7 @@ jobs:
           tag_name: ${{ env.TAG_NAME }}
           target_commitish: ${{ github.sha }}
           name: ${{ env.RELEASE_NAME }}
+          generate_release_notes: true
           body: |
             Release version v${{ env.APP_VERSION }}
 
