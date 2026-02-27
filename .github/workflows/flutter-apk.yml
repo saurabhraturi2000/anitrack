@@ -52,10 +52,8 @@ jobs:
           path: app/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
 
-      - name: Extract version from pubspec
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Prepare release metadata
         run: |
-          TAG_NAME="${GITHUB_REF#refs/tags/}"
           VERSION_LINE="$(grep -m1 '^version:' pubspec.yaml | awk '{print $2}')"
           APP_VERSION="${VERSION_LINE%%+*}"
           BUILD_NUMBER="${VERSION_LINE#*+}"
@@ -69,24 +67,32 @@ jobs:
             BUILD_NUMBER=""
           fi
 
-          if [ "$TAG_NAME" != "v$APP_VERSION" ]; then
-            echo "Tag ($TAG_NAME) does not match pubspec version (v$APP_VERSION)"
-            exit 1
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            if [ "$TAG_NAME" != "v$APP_VERSION" ]; then
+              echo "Tag ($TAG_NAME) does not match pubspec version (v$APP_VERSION)"
+              exit 1
+            fi
+          else
+            TAG_NAME="v${APP_VERSION}-build-${GITHUB_RUN_NUMBER}"
           fi
 
           echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
           echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
           echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
+          echo "RELEASE_NAME=Release ${TAG_NAME}" >> "$GITHUB_ENV"
 
       - name: Publish GitHub release asset
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG_NAME }}
-          name: Release v${{ env.APP_VERSION }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ env.RELEASE_NAME }}
           body: |
             Release version v${{ env.APP_VERSION }}
 
             Tag: ${{ env.TAG_NAME }}
             Build: ${{ env.BUILD_NUMBER || 'n/a' }}
+            Workflow run: ${{ github.run_number }}
           files: app/build/app/outputs/flutter-apk/app-release.apk
+          overwrite_files: true
