@@ -16,7 +16,9 @@ class ProfileScreen extends ConsumerWidget {
       body: authState.when(
         data: (data) {
           return data == AuthState.authenticated
-              ? Column(
+              ? (user == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Stack(
@@ -27,7 +29,7 @@ class ProfileScreen extends ConsumerWidget {
                           width: double.infinity,
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                              image: NetworkImage(user!.bannerImage!),
+                              image: NetworkImage(user.bannerImage ?? ''),
                               fit: BoxFit.cover,
                             ), // Change to your preferred color
                           ),
@@ -158,7 +160,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     //tabs(bio,overview,activity,reviews)
                   ],
-                )
+                ))
               : LoginScreen();
         },
         error: (error, stack) => Center(

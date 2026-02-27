@@ -26,15 +26,11 @@ class AniListOAuth {
 
   static const String clientId = '24352';
   static const String callbackUrlScheme = 'app';
-  static const String _redirectUri = 'app://anitrack/auth';
+  static const int _fallbackManualExpirySeconds = 3600;
 
   static Future<AniListOAuthCredentials> login() async {
-    final state = _randomState();
-    final authUri = Uri.https('anilist.co', '/api/v2/oauth/authorize', {
-      'client_id': clientId,
-      'response_type': 'token',
-      'state': state,
-    });
+    final state = generateState();
+    final authUri = buildAuthorizationUri(state: state);
 
     final callback = await FlutterWebAuth2.authenticate(
       url: authUri.toString(),
@@ -65,7 +61,7 @@ class AniListOAuth {
     );
   }
 
-  static String _randomState() {
+  static String generateState() {
     const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
     final random = Random.secure();
     return List.generate(
@@ -73,5 +69,70 @@ class AniListOAuth {
       (_) => chars[random.nextInt(chars.length)],
     ).join();
   }
-}
 
+  static Uri buildAuthorizationUri({String? state}) {
+    final params = <String, String>{
+      'client_id': clientId,
+      'response_type': 'token',
+    };
+    if (state != null && state.isNotEmpty) {
+      params['state'] = state;
+    }
+    return Uri.https('anilist.co', '/api/v2/oauth/authorize', params);
+  }
+
+  static AniListOAuthCredentials parseManualInput({
+    required String input,
+    String? expectedState,
+  }) {
+    final raw = input.trim();
+    if (raw.isEmpty) {
+      throw AniListOAuthException(
+          'Please paste a callback URL or access token.');
+    }
+
+    Map<String, String> params = {};
+
+    if (raw.startsWith('#')) {
+      params = Uri.splitQueryString(raw.substring(1));
+    } else {
+      try {
+        final parsedUri = Uri.parse(raw);
+        if (parsedUri.fragment.isNotEmpty) {
+          params = Uri.splitQueryString(parsedUri.fragment);
+        } else if (parsedUri.query.isNotEmpty) {
+          params = parsedUri.queryParameters;
+        }
+      } catch (_) {}
+    }
+
+    var token = params['access_token'];
+    final expiresFromParams = int.tryParse(params['expires_in'] ?? '');
+
+    if (token == null || token.isEmpty) {
+      final looksLikeToken = !raw.contains(RegExp(r'[\s=&?#]'));
+      if (!looksLikeToken) {
+        throw AniListOAuthException(
+          'Could not find access token. Paste callback URL, fragment, or token.',
+        );
+      }
+      token = raw;
+    }
+
+    if (expectedState != null &&
+        expectedState.isNotEmpty &&
+        params['state'] != null &&
+        params['state'] != expectedState) {
+      throw AniListOAuthException(
+        'State mismatch. Regenerate the URL and try again.',
+      );
+    }
+
+    return AniListOAuthCredentials(
+      accessToken: token,
+      expiresInSeconds: (expiresFromParams != null && expiresFromParams > 0)
+          ? expiresFromParams
+          : _fallbackManualExpirySeconds,
+    );
+  }
+}

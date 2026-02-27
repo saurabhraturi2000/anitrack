@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -92,6 +93,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     )
                   : const Text('Login with AniList'),
             ),
+            if (!kReleaseMode) ...[
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => context.push(Routes.testLogin),
+                child: const Text('Use Test Login (Debug)'),
+              ),
+            ],
           ],
         ),
       ),

@@ -13,6 +13,10 @@ final userProvider = StateProvider<Viewer?>((ref) => null);
 class CurrentAuthState extends AsyncNotifier<AuthState> {
   static const _accessTokenKey = 'token';
   static const _tokenExpiryKey = 'token_expiry';
+  static const _viewerIdKey = 'viewer_id';
+  static const _viewerNameKey = 'viewer_name';
+  static const _viewerAvatarKey = 'viewer_avatar';
+  static const _viewerBannerKey = 'viewer_banner';
 
   @override
   Future<AuthState> build() async {
@@ -30,16 +34,20 @@ class CurrentAuthState extends AsyncNotifier<AuthState> {
       return AuthState.unauthenticated;
     }
 
+    final cachedViewer = _readCachedViewer(prefs);
+    if (cachedViewer != null) {
+      ref.read(userProvider.notifier).state = cachedViewer;
+    }
+
     try {
       final viewerData = await _fetchViewerData(token);
-
-      // Store user data in userProvider
       ref.read(userProvider.notifier).state = viewerData;
-
-      return AuthState.authenticated;
+      await _cacheViewer(viewerData);
     } catch (e) {
-      return AuthState.unauthenticated;
+      // Keep user logged in if token is still valid, even if profile fetch fails.
     }
+
+    return AuthState.authenticated;
   }
 
   /// **Function to save token, expiry date, and authenticate the user**
@@ -52,9 +60,11 @@ class CurrentAuthState extends AsyncNotifier<AuthState> {
     try {
       final viewerData = await _fetchViewerData(token);
       ref.read(userProvider.notifier).state = viewerData;
+      await _cacheViewer(viewerData);
       state = AsyncData(AuthState.authenticated);
     } catch (e) {
-      state = AsyncData(AuthState.unauthenticated);
+      // Token is already stored and valid; do not force logout on transient API failure.
+      state = AsyncData(AuthState.authenticated);
     }
   }
 
@@ -62,6 +72,10 @@ class CurrentAuthState extends AsyncNotifier<AuthState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_accessTokenKey);
     await prefs.remove(_tokenExpiryKey);
+    await prefs.remove(_viewerIdKey);
+    await prefs.remove(_viewerNameKey);
+    await prefs.remove(_viewerAvatarKey);
+    await prefs.remove(_viewerBannerKey);
     ref.read(userProvider.notifier).state = null;
   }
 
@@ -97,10 +111,40 @@ class CurrentAuthState extends AsyncNotifier<AuthState> {
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
-      return Viewer.fromJson(json['data']['Viewer']);
+      final viewer = json['data']?['Viewer'];
+      if (viewer is Map<String, dynamic>) {
+        return Viewer.fromJson(viewer);
+      }
+      throw Exception('Invalid viewer response');
     } else {
       throw Exception('Failed to fetch viewer data');
     }
+  }
+
+  Future<void> _cacheViewer(Viewer viewer) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_viewerIdKey, viewer.id);
+    await prefs.setString(_viewerNameKey, viewer.name);
+    await prefs.setString(_viewerAvatarKey, viewer.avatarUrl);
+    await prefs.setString(_viewerBannerKey, viewer.bannerImage ?? '');
+  }
+
+  Viewer? _readCachedViewer(SharedPreferences prefs) {
+    final id = prefs.getInt(_viewerIdKey);
+    final name = prefs.getString(_viewerNameKey);
+    final avatar = prefs.getString(_viewerAvatarKey);
+    final banner = prefs.getString(_viewerBannerKey);
+
+    if (id == null || name == null || avatar == null) {
+      return null;
+    }
+
+    return Viewer(
+      id: id,
+      name: name,
+      avatarUrl: avatar,
+      bannerImage: banner,
+    );
   }
 }
 
