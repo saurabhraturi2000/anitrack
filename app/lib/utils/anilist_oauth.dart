@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:anitrack/utils/app_config.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 class AniListOAuthException implements Exception {
@@ -24,7 +25,6 @@ class AniListOAuthCredentials {
 class AniListOAuth {
   const AniListOAuth._();
 
-  static const String clientId = '24352';
   static const String callbackUrlScheme = 'app';
   static const int _fallbackManualExpirySeconds = 3600;
 
@@ -71,6 +71,13 @@ class AniListOAuth {
   }
 
   static Uri buildAuthorizationUri({String? state}) {
+    final clientId = AppConfig.anilistClientId.trim();
+    if (clientId.isEmpty) {
+      throw AniListOAuthException(
+        'Missing ANILIST_CLIENT_ID. Add it via --dart-define.',
+      );
+    }
+
     final params = <String, String>{
       'client_id': clientId,
       'response_type': 'token',

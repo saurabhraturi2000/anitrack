@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:anitrack/utils/auth_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -11,8 +12,6 @@ final authStateProvider =
 final userProvider = StateProvider<Viewer?>((ref) => null);
 
 class CurrentAuthState extends AsyncNotifier<AuthState> {
-  static const _accessTokenKey = 'token';
-  static const _tokenExpiryKey = 'token_expiry';
   static const _viewerIdKey = 'viewer_id';
   static const _viewerNameKey = 'viewer_name';
   static const _viewerAvatarKey = 'viewer_avatar';
@@ -21,8 +20,8 @@ class CurrentAuthState extends AsyncNotifier<AuthState> {
   @override
   Future<AuthState> build() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString(_accessTokenKey);
-    final expiryTimestamp = prefs.getInt(_tokenExpiryKey);
+    final token = await AuthStorage.instance.readAccessToken();
+    final expiryTimestamp = await AuthStorage.instance.readExpiryTimestamp();
 
     if (token == null || expiryTimestamp == null) {
       return AuthState.unauthenticated;
@@ -53,9 +52,10 @@ class CurrentAuthState extends AsyncNotifier<AuthState> {
   /// **Function to save token, expiry date, and authenticate the user**
   Future<void> saveTokenAndAuthenticate(
       String token, DateTime expiryDate) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_accessTokenKey, token);
-    await prefs.setInt(_tokenExpiryKey, expiryDate.millisecondsSinceEpoch);
+    await AuthStorage.instance.saveSession(
+      token,
+      expiryDate.millisecondsSinceEpoch,
+    );
 
     try {
       final viewerData = await _fetchViewerData(token);
@@ -69,9 +69,8 @@ class CurrentAuthState extends AsyncNotifier<AuthState> {
   }
 
   Future<void> _clearToken() async {
+    await AuthStorage.instance.clearSession();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_accessTokenKey);
-    await prefs.remove(_tokenExpiryKey);
     await prefs.remove(_viewerIdKey);
     await prefs.remove(_viewerNameKey);
     await prefs.remove(_viewerAvatarKey);

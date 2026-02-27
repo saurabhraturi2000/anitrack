@@ -28,3 +28,25 @@ the `lib/src/localization` directory.
 To support additional languages, please visit the tutorial on
 [Internationalizing Flutter apps](https://flutter.dev/to/internationalization).
 
+## Local Secrets (Not Committed)
+
+Create `secrets.json` in the `app` folder (this file is git-ignored):
+
+```json
+{
+  "ANILIST_CLIENT_ID": "your_anilist_client_id_here"
+}
+```
+
+Run with:
+
+```bash
+flutter run --dart-define-from-file=secrets.json
+```
+
+Build with:
+
+```bash
+flutter build apk --dart-define-from-file=secrets.json
+```
+

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:anitrack/screens/profile/profile_screen.dart';
 import 'package:anitrack/screens/auth/test_login_screen.dart';
 import 'package:anitrack/utils/auth_provider.dart';
+import 'package:anitrack/utils/auth_storage.dart';
 import 'package:anitrack/widgets/scaffold_with_navbar.dart';
 import 'package:anitrack/screens/auth/login_screen.dart';
 import 'package:anitrack/screens/discover/discover_screen.dart';
@@ -17,14 +18,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Routes {
   const Routes._();
 
-  static const String _accessTokenKey = 'token';
-  static const String _tokenExpiryKey = 'token_expiry';
   static const String notFound = '/404';
   static const String splash = '/splash';
   static const String login = '/login';
@@ -156,9 +154,8 @@ class Routes {
   }
 
   static Future<bool> _hasValidSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString(_accessTokenKey);
-    final expiryTimestamp = prefs.getInt(_tokenExpiryKey);
+    final token = await AuthStorage.instance.readAccessToken();
+    final expiryTimestamp = await AuthStorage.instance.readExpiryTimestamp();
     if (token == null || expiryTimestamp == null) {
       return false;
     }

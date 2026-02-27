@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:anitrack/utils/auth_storage.dart';
 import 'package:http/http.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
   static final _url = Uri.parse('https://graphql.anilist.co');
@@ -12,8 +12,7 @@ class ApiService {
     String query, [
     Map<String, dynamic> variables = const {},
   ]) async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString("token");
+    final accessToken = await AuthStorage.instance.readAccessToken();
     Map<String, String> headers = {
       "credentials": 'include',
       'Content-Type': 'application/json',
