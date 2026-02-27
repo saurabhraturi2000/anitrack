@@ -85,6 +85,7 @@ jobs:
       - name: Publish GitHub release asset
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GH_RELEASE_PAT || github.token }}
           tag_name: ${{ env.TAG_NAME }}
           target_commitish: ${{ github.sha }}
           name: ${{ env.RELEASE_NAME }}
