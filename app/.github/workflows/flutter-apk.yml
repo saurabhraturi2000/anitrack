@@ -1,0 +1,89 @@
+name: Flutter Release APK
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: flutter-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.41.1"
+          channel: "stable"
+          cache: true
+          cache-key: "flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}"
+
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+      - name: Extract version from pubspec
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          VERSION_LINE="$(grep -m1 '^version:' pubspec.yaml | awk '{print $2}')"
+          APP_VERSION="${VERSION_LINE%%+*}"
+          BUILD_NUMBER="${VERSION_LINE#*+}"
+
+          if [ -z "$VERSION_LINE" ] || [ -z "$APP_VERSION" ]; then
+            echo "Could not read version from pubspec.yaml"
+            exit 1
+          fi
+
+          if [ "$BUILD_NUMBER" = "$VERSION_LINE" ]; then
+            BUILD_NUMBER=""
+          fi
+
+          if [ "$TAG_NAME" != "v$APP_VERSION" ]; then
+            echo "Tag ($TAG_NAME) does not match pubspec version (v$APP_VERSION)"
+            exit 1
+          fi
+
+          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
+          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
+
+      - name: Publish GitHub release asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          name: Release v${{ env.APP_VERSION }}
+          body: |
+            Release version v${{ env.APP_VERSION }}
+
+            Tag: ${{ env.TAG_NAME }}
+            Build: ${{ env.BUILD_NUMBER || 'n/a' }}
+          files: build/app/outputs/flutter-apk/app-release.apk
