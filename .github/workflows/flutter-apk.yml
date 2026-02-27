@@ -43,7 +43,7 @@ jobs:
         run: flutter pub get --enforce-lockfile
 
       - name: Build release APK
-        run: flutter build apk --release
+        run: flutter build apk --release --dart-define=ANILIST_CLIENT_ID=${{ secrets.ANILIST_CLIENT_ID }}
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
