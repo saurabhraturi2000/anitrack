@@ -20,7 +20,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'anitrack',
+      title: 'Anitrack',
       theme: AppThemeFactory.buildTheme(
         style: appearance.style,
         brightness: Brightness.light,
