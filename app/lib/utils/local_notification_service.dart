@@ -21,34 +21,38 @@ class LocalNotificationService {
       iOS: iosSettings,
     );
 
-    await _plugin.initialize(initSettings);
+    try {
+      await _plugin.initialize(initSettings);
 
-    await _plugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
-    await _plugin
-        .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
+      await _plugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.requestNotificationsPermission();
+      await _plugin
+          .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          );
 
-    const androidChannel = AndroidNotificationChannel(
-      'anitrack_notifications',
-      'AniTrack Notifications',
-      description: 'New AniList notifications',
-      importance: Importance.high,
-    );
+      const androidChannel = AndroidNotificationChannel(
+        'anitrack_notifications',
+        'AniTrack Notifications',
+        description: 'New AniList notifications',
+        importance: Importance.high,
+      );
 
-    await _plugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(androidChannel);
+      await _plugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(androidChannel);
 
-    _initialized = true;
+      _initialized = true;
+    } catch (_) {
+      _initialized = false;
+    }
   }
 
   Future<void> show({
@@ -56,6 +60,7 @@ class LocalNotificationService {
     required String title,
     required String body,
   }) async {
+    if (!_initialized) return;
     const details = NotificationDetails(
       android: AndroidNotificationDetails(
         'anitrack_notifications',
@@ -67,6 +72,10 @@ class LocalNotificationService {
       iOS: DarwinNotificationDetails(),
     );
 
-    await _plugin.show(id, title, body, details);
+    try {
+      await _plugin.show(id, title, body, details);
+    } catch (_) {
+      // Ignore notification failures to keep app stable.
+    }
   }
 }
