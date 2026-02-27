@@ -1,14 +1,19 @@
 import 'dart:developer';
 
 import 'package:anitrack/screens/profile/profile_screen.dart';
+import 'package:anitrack/screens/auth/test_login_screen.dart';
 import 'package:anitrack/utils/auth_provider.dart';
 import 'package:anitrack/widgets/scaffold_with_navbar.dart';
 import 'package:anitrack/screens/auth/login_screen.dart';
 import 'package:anitrack/screens/discover/discover_screen.dart';
 import 'package:anitrack/screens/discover/search_screen.dart';
+import 'package:anitrack/screens/home/anime_detail_screen.dart';
+import 'package:anitrack/screens/home/manga_detail_screen.dart';
+import 'package:anitrack/screens/home/notifications_screen.dart';
 import 'package:anitrack/screens/home/home_screen.dart';
 import 'package:anitrack/screens/settings/appearance_screen.dart';
 import 'package:anitrack/screens/settings/settings_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,7 +28,11 @@ class Routes {
   static const String notFound = '/404';
   static const String splash = '/splash';
   static const String login = '/login';
+  static const String testLogin = '/login/test';
   static const String home = '/home';
+  static const String animeDetail = '/anime';
+  static const String mangaDetail = '/manga';
+  static const String notifications = '/notifications';
   static const String discover = '/discover';
   static const String search = '/search';
   static const String profile = '/profile';
@@ -78,6 +87,31 @@ class Routes {
         path: login,
         builder: (context, state) => const LoginScreen(),
       ),
+      GoRoute(
+        path: notifications,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '$animeDetail/:id',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) return const NotFoundView();
+          return AnimeDetailScreen(mediaId: id);
+        },
+      ),
+      GoRoute(
+        path: '$mangaDetail/:id',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          if (id == null) return const NotFoundView();
+          return MangaDetailScreen(mediaId: id);
+        },
+      ),
+      if (!kReleaseMode)
+        GoRoute(
+          path: testLogin,
+          builder: (context, state) => const TestLoginScreen(),
+        ),
       ShellRoute(
         builder: (context, state, child) {
           return ScaffoldWithNavBar(child: child);

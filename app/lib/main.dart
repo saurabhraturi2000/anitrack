@@ -1,6 +1,7 @@
 import 'package:anitrack/utils/routes.dart';
 import 'package:anitrack/utils/appearance_provider.dart';
 import 'package:anitrack/utils/appearance_theme.dart';
+import 'package:anitrack/utils/notification_poller_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +18,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appearance = ref.watch(appearanceProvider);
+    ref.watch(notificationPollerProvider);
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,

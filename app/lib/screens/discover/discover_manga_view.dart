@@ -27,7 +27,10 @@ class DiscoverMangaView extends ConsumerWidget {
           children: [
             SizedBox(height: 10),
             //carousel
-            CarouselSection(data: trendingManga!),
+            CarouselSection(
+              data: trendingManga!,
+              detailRouteBasePath: Routes.mangaDetail,
+            ),
             SizedBox(height: 10),
             // QuickActions(),
             //genres
@@ -42,7 +45,10 @@ class DiscoverMangaView extends ConsumerWidget {
             CustomHeadline(
               title: "POPULAR",
             ),
-            PopularSection(data: popularManga!),
+            PopularSection(
+              data: popularManga!,
+              detailRouteBasePath: Routes.mangaDetail,
+            ),
           ],
         ));
       },

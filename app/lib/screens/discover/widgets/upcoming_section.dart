@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 
 class UpcomingSection extends StatefulWidget {
   final MediaModel data;
-  const UpcomingSection({super.key, required this.data});
+  final String? detailRouteBasePath;
+  const UpcomingSection({
+    super.key,
+    required this.data,
+    this.detailRouteBasePath,
+  });
 
   @override
   State<UpcomingSection> createState() => _UpcomingSectionState();
@@ -22,7 +27,10 @@ class _UpcomingSectionState extends State<UpcomingSection> {
               itemCount: widget.data.media!.length,
               itemBuilder: (context, index) {
                 final media = widget.data.media![index];
-                return VerticalAnimeCard(media: media);
+                return VerticalAnimeCard(
+                  media: media,
+                  detailRouteBasePath: widget.detailRouteBasePath,
+                );
               },
             ),
     );

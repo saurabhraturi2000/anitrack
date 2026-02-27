@@ -138,7 +138,9 @@ query MediaListCollection(
   MediaListCollection(type: $type, status: $status, userId: $userId) {
     lists {
       entries {
+        id
         media {
+          id
           title {
             english
             romaji
@@ -221,8 +223,10 @@ query CurrentMangaPage($userId: Int, $page: Int, $perPage: Int, $status: MediaLi
       status: $status
       sort: UPDATED_TIME_DESC
     ) {
+      id
       progress
       media {
+        id
         title {
           english
           romaji
@@ -236,6 +240,307 @@ query CurrentMangaPage($userId: Int, $page: Int, $perPage: Int, $status: MediaLi
         }
         episodes
         status
+      }
+    }
+  }
+}
+''';
+
+  static const String saveMediaListEntry = r'''
+mutation SaveMediaListEntry(
+  $mediaId: Int
+  $progress: Int
+  $status: MediaListStatus
+) {
+  SaveMediaListEntry(mediaId: $mediaId, progress: $progress, status: $status) {
+    id
+    progress
+    status
+  }
+}
+''';
+
+  static const String deleteMediaListEntry = r'''
+mutation DeleteMediaListEntry($id: Int) {
+  DeleteMediaListEntry(id: $id) {
+    deleted
+  }
+}
+''';
+
+  static const String mediaDetails = r'''
+query MediaDetails($id: Int) {
+  Media(id: $id) {
+    id
+    type
+    format
+    status
+    episodes
+    chapters
+    volumes
+    duration
+    averageScore
+    popularity
+    season
+    seasonYear
+    description(asHtml: false)
+    genres
+    coverImage {
+      large
+    }
+    bannerImage
+    title {
+      english
+      romaji
+      native
+    }
+    startDate {
+      day
+      month
+      year
+    }
+    endDate {
+      day
+      month
+      year
+    }
+    nextAiringEpisode {
+      episode
+      airingAt
+    }
+    studios(isMain: true) {
+      nodes {
+        name
+      }
+    }
+    mediaListEntry {
+      id
+      status
+      progress
+    }
+  }
+}
+''';
+
+  static const String notifications = r'''
+query NotificationsPage($page: Int, $perPage: Int) {
+  Page(page: $page, perPage: $perPage) {
+    notifications(resetNotificationCount: false) {
+      __typename
+      ... on AiringNotification {
+        id
+        type
+        createdAt
+        episode
+        media {
+          title {
+            english
+            romaji
+          }
+          coverImage {
+            large
+          }
+        }
+      }
+      ... on FollowingNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+      }
+      ... on ActivityMessageNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+      }
+      ... on ActivityMentionNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+      }
+      ... on ActivityReplyNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+      }
+      ... on ActivityReplySubscribedNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+      }
+      ... on ActivityLikeNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+      }
+      ... on ActivityReplyLikeNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+      }
+      ... on ThreadCommentMentionNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+        thread {
+          title
+        }
+      }
+      ... on ThreadCommentReplyNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+        thread {
+          title
+        }
+      }
+      ... on ThreadCommentSubscribedNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+        thread {
+          title
+        }
+      }
+      ... on ThreadCommentLikeNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+        thread {
+          title
+        }
+      }
+      ... on ThreadLikeNotification {
+        id
+        type
+        createdAt
+        user {
+          name
+          avatar {
+            large
+          }
+        }
+        thread {
+          title
+        }
+      }
+      ... on RelatedMediaAdditionNotification {
+        id
+        type
+        createdAt
+        context
+        media {
+          title {
+            english
+            romaji
+          }
+          coverImage {
+            large
+          }
+        }
+      }
+      ... on MediaDataChangeNotification {
+        id
+        type
+        createdAt
+        context
+        reason
+        media {
+          title {
+            english
+            romaji
+          }
+          coverImage {
+            large
+          }
+        }
+      }
+      ... on MediaMergeNotification {
+        id
+        type
+        createdAt
+        context
+        media {
+          title {
+            english
+            romaji
+          }
+          coverImage {
+            large
+          }
+        }
+      }
+      ... on MediaDeletionNotification {
+        id
+        type
+        createdAt
+        context
+        deletedMediaTitle
       }
     }
   }

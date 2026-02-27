@@ -1,23 +1,37 @@
 import 'package:anitrack/models/collection_model.dart';
 import 'package:anitrack/utils/app_colors.dart';
+import 'package:anitrack/utils/routes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class HomeAnimeCard extends StatelessWidget {
+class HomeAnimeCard extends ConsumerStatefulWidget {
   const HomeAnimeCard({
     super.key,
     required this.data,
+    this.onMarkProgress,
+    this.onOpenDetails,
   });
 
   final Entry data;
+  final Future<void> Function(int nextProgress)? onMarkProgress;
+  final VoidCallback? onOpenDetails;
+
+  @override
+  ConsumerState<HomeAnimeCard> createState() => _HomeAnimeCardState();
+}
+
+class _HomeAnimeCardState extends ConsumerState<HomeAnimeCard> {
+  bool _isSaving = false;
 
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     final onSurface = Theme.of(context).colorScheme.onSurface;
-    final media = data.media;
+    final media = widget.data.media;
     final coverUrl = media?.coverImage?.large;
     final title = media?.title?.english ?? media?.title?.romaji ?? 'Untitled';
-    final progress = data.progress ?? 0;
+    final progress = widget.data.progress ?? 0;
     final totalEpisodes = media?.episodes;
     final nextEpisode = media?.nextAiringEpisode?.episode;
     final airingAt = media?.nextAiringEpisode?.airingAt;
@@ -159,41 +173,64 @@ class HomeAnimeCard extends StatelessWidget {
                                 ),
                               ),
                             )
-                          : Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 7,
-                              ),
-                              decoration: BoxDecoration(
-                                  border: Border.all(color: colors.accent),
-                                  color: colors.surface.withValues(alpha: 0.4),
-                                  borderRadius: BorderRadius.circular(8)),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    (progress + 1).toString(),
-                                    style: TextStyle(
-                                        color: onSurface, fontSize: 13),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    Icons.check,
-                                    size: 15,
-                                    color: colors.accent,
-                                  ),
-                                ],
+                          : InkWell(
+                              borderRadius: BorderRadius.circular(8),
+                              onTap: _isSaving || widget.onMarkProgress == null
+                                  ? null
+                                  : () async {
+                                      setState(() => _isSaving = true);
+                                      try {
+                                        await widget.onMarkProgress!(progress + 1);
+                                      } finally {
+                                        if (mounted) {
+                                          setState(() => _isSaving = false);
+                                        }
+                                      }
+                                    },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 7,
+                                ),
+                                decoration: BoxDecoration(
+                                    border: Border.all(color: colors.accent),
+                                    color: colors.surface.withValues(alpha: 0.4),
+                                    borderRadius: BorderRadius.circular(8)),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      _isSaving ? '...' : (progress + 1).toString(),
+                                      style: TextStyle(
+                                          color: onSurface, fontSize: 13),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Icon(
+                                      Icons.check,
+                                      size: 15,
+                                      color: colors.accent,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                            color: colors.divider,
-                            borderRadius: BorderRadius.circular(8)),
-                        child: Icon(
-                          Icons.more_horiz,
-                          color: colors.iconMuted,
-                          size: 20,
+                      InkWell(
+                        borderRadius: BorderRadius.circular(8),
+                        onTap: widget.onOpenDetails ??
+                            (media?.id == null
+                                ? null
+                                : () => context
+                                    .push('${Routes.animeDetail}/${media!.id}')),
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                              color: colors.divider,
+                              borderRadius: BorderRadius.circular(8)),
+                          child: Icon(
+                            Icons.more_horiz,
+                            color: colors.iconMuted,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ],

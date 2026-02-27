@@ -1,9 +1,11 @@
 import 'package:anitrack/models/media_model.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class CarouselSection extends StatefulWidget {
   final MediaModel? data;
-  const CarouselSection({super.key, this.data});
+  final String? detailRouteBasePath;
+  const CarouselSection({super.key, this.data, this.detailRouteBasePath});
 
   @override
   State<CarouselSection> createState() => _CarouselSectionState();
@@ -31,69 +33,75 @@ class _CarouselSectionState extends State<CarouselSection> {
         children: widget.data!.media == null
             ? []
             : widget.data!.media!.map((e) {
-                return Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                  e.bannerImage ?? e.coverImage!.large!),
-                              fit: BoxFit.cover,
+                return InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: (widget.detailRouteBasePath != null && e.id != null)
+                      ? () => context.push('${widget.detailRouteBasePath}/${e.id}')
+                      : null,
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                    e.bannerImage ?? e.coverImage!.large!),
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.transparent,
-                                Color(0xE0000000),
-                              ],
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Color(0xE0000000),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      bottom: 12,
-                      left: 16,
-                      child: SizedBox(
-                        width: deviceSize.width * 0.75,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.45),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            e.title!.english ?? e.title!.romaji!,
-                            softWrap: true,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
+                      Positioned(
+                        bottom: 12,
+                        left: 16,
+                        child: SizedBox(
+                          width: deviceSize.width * 0.75,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.45),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              e.title!.english ?? e.title!.romaji!,
+                              softWrap: true,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               }).toList(),
       ),

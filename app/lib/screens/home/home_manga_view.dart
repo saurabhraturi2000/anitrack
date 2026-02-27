@@ -1,7 +1,12 @@
+import 'package:anitrack/models/collection_model.dart';
 import 'package:anitrack/screens/home/provider/home_state_provider.dart';
 import 'package:anitrack/screens/home/widgets/home_anime_card.dart';
+import 'package:anitrack/utils/api_service.dart';
+import 'package:anitrack/utils/graphql.dart';
+import 'package:anitrack/utils/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class CurrentMangaView extends ConsumerStatefulWidget {
   const CurrentMangaView({
@@ -62,7 +67,18 @@ class _CurrentMangaViewState extends ConsumerState<CurrentMangaView> {
         icon: Icons.menu_book_rounded,
         title: 'RELEASING',
       ),
-      ...releasingMangas.map((entry) => HomeAnimeCard(data: entry)),
+      ...releasingMangas.map(
+        (entry) => HomeAnimeCard(
+          data: entry,
+          onMarkProgress: (nextProgress) =>
+              _saveProgress(context, entry, nextProgress),
+          onOpenDetails: entry.media?.id == null
+              ? null
+              : () => context.push(
+                    '${Routes.mangaDetail}/${entry.media!.id}',
+                  ),
+        ),
+      ),
     ];
 
     if (widget.showFinished && feed.showFinishedSection) {
@@ -72,7 +88,18 @@ class _CurrentMangaViewState extends ConsumerState<CurrentMangaView> {
           icon: Icons.done_all,
           title: 'FINISHED',
         ),
-        ...finishedMangas.map((entry) => HomeAnimeCard(data: entry)),
+        ...finishedMangas.map(
+          (entry) => HomeAnimeCard(
+            data: entry,
+            onMarkProgress: (nextProgress) =>
+                _saveProgress(context, entry, nextProgress),
+            onOpenDetails: entry.media?.id == null
+                ? null
+                : () => context.push(
+                      '${Routes.mangaDetail}/${entry.media!.id}',
+                    ),
+          ),
+        ),
       ]);
     }
 
@@ -134,6 +161,39 @@ class _CurrentMangaViewState extends ConsumerState<CurrentMangaView> {
         ],
       ),
     );
+  }
+
+  Future<void> _saveProgress(
+    BuildContext context,
+    Entry entry,
+    int nextProgress,
+  ) async {
+    final mediaId = entry.media?.id;
+    if (mediaId == null) return;
+
+    final totalChapters = entry.media?.episodes;
+    final status = (totalChapters != null &&
+            totalChapters > 0 &&
+            nextProgress >= totalChapters)
+        ? 'COMPLETED'
+        : 'CURRENT';
+
+    try {
+      await ApiService().request(
+        GqlQuery.saveMediaListEntry,
+        {
+          'mediaId': mediaId,
+          'progress': nextProgress,
+          'status': status,
+        },
+      );
+      await ref.read(currentMangaFeedProvider.notifier).refresh();
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
   }
 }
 

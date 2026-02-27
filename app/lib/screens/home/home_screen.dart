@@ -7,6 +7,8 @@ import 'package:anitrack/utils/appearance_theme.dart';
 import 'package:anitrack/utils/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:anitrack/utils/routes.dart';
 
 enum _WatchType { anime, manga }
 
@@ -71,16 +73,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                color: colors.divider,
+            child: Material(
+              color: colors.divider,
+              borderRadius: BorderRadius.circular(10),
+              child: InkWell(
                 borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                Icons.notifications_none_rounded,
-                color: colors.iconMuted,
+                onTap: () => context.push(Routes.notifications),
+                child: SizedBox(
+                  width: 54,
+                  height: 54,
+                  child: Icon(
+                    Icons.notifications_none_rounded,
+                    color: colors.iconMuted,
+                  ),
+                ),
               ),
             ),
           ),

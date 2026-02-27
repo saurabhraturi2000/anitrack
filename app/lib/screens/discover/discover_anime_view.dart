@@ -30,7 +30,10 @@ class DiscoverAnimeView extends ConsumerWidget {
               SizedBox(height: 10),
               //carousel
               // const CarouselSection(),
-              CarouselSection(data: trendingAnime),
+              CarouselSection(
+                data: trendingAnime,
+                detailRouteBasePath: Routes.animeDetail,
+              ),
 
               SizedBox(height: 10),
               QuickActions(),
@@ -46,11 +49,17 @@ class DiscoverAnimeView extends ConsumerWidget {
               CustomHeadline(
                 title: "POPULAR THIS SEASON",
               ),
-              PopularSection(data: popularAnime!),
+              PopularSection(
+                data: popularAnime!,
+                detailRouteBasePath: Routes.animeDetail,
+              ),
               CustomHeadline(
                 title: "UPCOMING ANIMES",
               ),
-              UpcomingSection(data: upcomingAnime!),
+              UpcomingSection(
+                data: upcomingAnime!,
+                detailRouteBasePath: Routes.animeDetail,
+              ),
             ],
           ),
         );

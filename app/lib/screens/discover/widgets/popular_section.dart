@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 
 class PopularSection extends StatelessWidget {
   final MediaModel data;
-  const PopularSection({super.key, required this.data});
+  final String? detailRouteBasePath;
+  const PopularSection({
+    super.key,
+    required this.data,
+    this.detailRouteBasePath,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +21,10 @@ class PopularSection extends StatelessWidget {
               itemCount: data.media!.length,
               itemBuilder: (context, index) {
                 final media = data.media![index];
-                return VerticalAnimeCard(media: media);
+                return VerticalAnimeCard(
+                  media: media,
+                  detailRouteBasePath: detailRouteBasePath,
+                );
               },
             )
           : const Center(child: CircularProgressIndicator()),
