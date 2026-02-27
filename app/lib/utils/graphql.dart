@@ -546,4 +546,56 @@ query NotificationsPage($page: Int, $perPage: Int) {
   }
 }
 ''';
+
+  static const String searchMedia = r'''
+query SearchMedia(
+  $search: String
+  $type: MediaType
+  $genre: String
+  $format: MediaFormat
+  $status: MediaStatus
+  $season: MediaSeason
+  $seasonYear: Int
+  $countryOfOrigin: CountryCode
+  $sort: [MediaSort]
+  $averageScoreGreater: Int
+  $episodesGreater: Int
+  $chaptersGreater: Int
+  $isAdult: Boolean
+  $page: Int
+  $perPage: Int
+) {
+  Page(page: $page, perPage: $perPage) {
+    media(
+      search: $search
+      type: $type
+      genre: $genre
+      format: $format
+      status: $status
+      season: $season
+      seasonYear: $seasonYear
+      countryOfOrigin: $countryOfOrigin
+      sort: $sort
+      averageScore_greater: $averageScoreGreater
+      episodes_greater: $episodesGreater
+      chapters_greater: $chaptersGreater
+      isAdult: $isAdult
+    ) {
+      id
+      type
+      format
+      status
+      episodes
+      chapters
+      coverImage {
+        large
+      }
+      title {
+        english
+        romaji
+      }
+    }
+  }
+}
+''';
 }

@@ -25,9 +25,12 @@ final discoverAnimeProvider = FutureProvider((ref) async {
       'seasonYear': nextSeasonInfo.$2,
     },
   );
-  final trendingAnime = MediaModel.fromJson(trendingData['Page']);
-  final popularAnime = MediaModel.fromJson(popularData['Page']);
-  final upcomingAnime = MediaModel.fromJson(upcomingData['Page']);
+  final trendingAnime =
+      MediaModel.fromJson(_safePage(trendingData));
+  final popularAnime =
+      MediaModel.fromJson(_safePage(popularData));
+  final upcomingAnime =
+      MediaModel.fromJson(_safePage(upcomingData));
   return {
     "trendingAnime": trendingAnime,
     "popularAnime": popularAnime,
@@ -42,13 +45,21 @@ final discoverMangaProvider = FutureProvider((ref) async {
   final popularData = await ApiService().request(
     GqlQuery.popularManga,
   );
-  final trendingManga = MediaModel.fromJson(trendingData['Page']);
-  final popularManga = MediaModel.fromJson(popularData['Page']);
+  final trendingManga =
+      MediaModel.fromJson(_safePage(trendingData));
+  final popularManga =
+      MediaModel.fromJson(_safePage(popularData));
   return {
     "trendingManga": trendingManga,
     "popularManga": popularManga,
   };
 });
+
+Map<String, dynamic> _safePage(Map<String, dynamic> data) {
+  final page = data['Page'];
+  if (page is Map<String, dynamic>) return page;
+  return const <String, dynamic>{'media': <dynamic>[]};
+}
 
 String _seasonForMonth(int month) {
   if (month >= 1 && month <= 3) return 'WINTER';

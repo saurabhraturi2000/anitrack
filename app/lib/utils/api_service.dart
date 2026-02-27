@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
   static final _url = Uri.parse('https://graphql.anilist.co');
 
-  Future request(
+  Future<Map<String, dynamic>> request(
     String query, [
     Map<String, dynamic> variables = const {},
   ]) async {
@@ -36,7 +36,11 @@ class ApiService {
         );
       }
 
-      return body['data'];
+      final data = body['data'];
+      if (data is! Map<String, dynamic>) {
+        throw StateError('Invalid API response: missing data payload.');
+      }
+      return data;
     } on SocketException {
       throw Exception('Failed to connect');
     } on TimeoutException {
