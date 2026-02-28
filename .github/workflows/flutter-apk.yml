@@ -5,6 +5,11 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Release tag (e.g. v0.0.3)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -56,31 +61,26 @@ jobs:
         run: |
           VERSION_LINE="$(grep -m1 '^version:' pubspec.yaml | awk '{print $2}')"
           APP_VERSION="${VERSION_LINE%%+*}"
-          BUILD_NUMBER="${VERSION_LINE#*+}"
 
           if [ -z "$VERSION_LINE" ] || [ -z "$APP_VERSION" ]; then
             echo "Could not read version from pubspec.yaml"
             exit 1
           fi
 
-          if [ "$BUILD_NUMBER" = "$VERSION_LINE" ]; then
-            BUILD_NUMBER=""
-          fi
-
           if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
             TAG_NAME="${GITHUB_REF#refs/tags/}"
-            if [ "$TAG_NAME" != "v$APP_VERSION" ]; then
-              echo "Tag ($TAG_NAME) does not match pubspec version (v$APP_VERSION)"
-              exit 1
-            fi
           else
-            TAG_NAME="v${APP_VERSION}-build-${GITHUB_RUN_NUMBER}"
+            TAG_NAME="${{ inputs.tag_name }}"
+          fi
+
+          if [ "$TAG_NAME" != "v$APP_VERSION" ]; then
+            echo "Tag ($TAG_NAME) does not match pubspec version (v$APP_VERSION)"
+            exit 1
           fi
 
           echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
           echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
-          echo "BUILD_NUMBER=$BUILD_NUMBER" >> "$GITHUB_ENV"
-          echo "RELEASE_NAME=Release ${TAG_NAME}" >> "$GITHUB_ENV"
+          echo "RELEASE_NAME=${TAG_NAME}" >> "$GITHUB_ENV"
 
       - name: Publish GitHub release asset
         uses: softprops/action-gh-release@v2
@@ -90,11 +90,5 @@ jobs:
           target_commitish: ${{ github.sha }}
           name: ${{ env.RELEASE_NAME }}
           generate_release_notes: true
-          body: |
-            Release version v${{ env.APP_VERSION }}
-
-            Tag: ${{ env.TAG_NAME }}
-            Build: ${{ env.BUILD_NUMBER || 'n/a' }}
-            Workflow run: ${{ github.run_number }}
           files: app/build/app/outputs/flutter-apk/app-release.apk
           overwrite_files: true

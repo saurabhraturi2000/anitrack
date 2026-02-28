@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:anitrack/utils/anilist_oauth.dart';
 import 'package:anitrack/utils/auth_provider.dart';
+import 'package:anitrack/utils/auth_storage.dart';
 import 'package:anitrack/utils/routes.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -33,11 +34,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           );
       if (mounted) context.go(Routes.profile);
     } on AniListOAuthException catch (e) {
+      if (await _hasValidSessionAfterCallbackRace()) {
+        if (mounted) context.go(Routes.profile);
+        return;
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.message)),
       );
     } catch (_) {
+      if (await _hasValidSessionAfterCallbackRace()) {
+        if (mounted) context.go(Routes.profile);
+        return;
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -47,6 +56,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  Future<bool> _hasValidSessionAfterCallbackRace() async {
+    // Give the deep-link based auth handler a moment to persist token.
+    await Future.delayed(const Duration(milliseconds: 500));
+    final token = await AuthStorage.instance.readAccessToken();
+    final expiry = await AuthStorage.instance.readExpiryTimestamp();
+    if (token == null || expiry == null) return false;
+    final expiryDate = DateTime.fromMillisecondsSinceEpoch(expiry);
+    return DateTime.now().isBefore(expiryDate);
   }
 
   @override
