@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Home,
@@ -12,44 +11,55 @@ import {
   Sliders,
   List,
   LogOut,
+  LogIn,
 } from 'lucide-react';
+import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Watchlist from '@/screens/Watchlist';
 import Discover from '@/screens/Discover';
 import Profile from '@/screens/Profile';
-import { TabType } from '@/types';
+import RightSidebar from '@/components/RightSidebar';
+import { useAuth } from '@/auth/AuthContext';
 
-const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('home');
+type DashboardNavTab = {
+  id: 'watchlist' | 'discover' | 'profile';
+  label: string;
+  path: string;
+  icon: React.ReactNode;
+  activeIcon: React.ReactNode;
+};
+
+const DashboardLayout: React.FC = () => {
+  const { isAuthenticated, login, logout, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const tabs: { id: TabType; label: string; icon: React.ReactNode; activeIcon: React.ReactNode }[] = [
+
+  const tabs: DashboardNavTab[] = [
     {
-      id: 'home',
-      label: 'Home',
+      id: 'watchlist',
+      label: 'Watchlist',
+      path: '/dashboard/watchlist',
       icon: <Home size={22} />,
       activeIcon: <Home size={22} fill="#3db4f2" />,
     },
     {
       id: 'discover',
       label: 'Discover',
+      path: '/dashboard/discover',
       icon: <Flame size={22} />,
       activeIcon: <Flame size={22} fill="#3db4f2" />,
     },
     {
       id: 'profile',
       label: 'Profile',
+      path: '/dashboard/profile',
       icon: <User size={22} />,
       activeIcon: <User size={22} fill="#3db4f2" />,
     },
   ];
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'home': return <Watchlist />;
-      case 'discover': return <Discover />;
-      case 'profile': return <Profile />;
-      default: return <Watchlist />;
-    }
-  };
+  const isActive = (path: string) => location.pathname === path;
+  const isWatchlistRoute = location.pathname === '/dashboard/watchlist';
 
   return (
     <div className="h-screen w-screen bg-[#0b1622] lg:bg-gradient-to-br lg:from-[#0b1622] lg:to-[#111f30]">
@@ -63,15 +73,15 @@ const App: React.FC = () => {
               {tabs.map((tab) => (
                 <button
                   key={`desktop-${tab.id}`}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => navigate(tab.path)}
                   className={`w-full rounded-xl px-4 py-3 transition-all duration-300 ${
-                    activeTab === tab.id
+                    isActive(tab.path)
                       ? 'bg-[#3db4f2]/15 text-[#3db4f2] ring-1 ring-[#3db4f2]/30'
                       : 'text-gray-400 hover:bg-[#151f2e] hover:text-gray-200'
                   }`}
                 >
                   <span className="flex items-center space-x-3 text-sm font-semibold tracking-wide">
-                    {activeTab === tab.id ? tab.activeIcon : tab.icon}
+                    {isActive(tab.path) ? tab.activeIcon : tab.icon}
                     <span>{tab.label}</span>
                   </span>
                 </button>
@@ -100,10 +110,15 @@ const App: React.FC = () => {
                       <span>{item.label}</span>
                     </button>
                   ))}
-                  <button className="mt-2 flex w-full items-center space-x-2 rounded-lg bg-[#3db4f2]/15 px-3 py-2 text-xs font-semibold text-[#3db4f2] hover:bg-[#3db4f2]/20">
-                    <LogOut size={16} />
-                    <span>Logout</span>
-                  </button>
+                  {!loading && (
+                    <button
+                      onClick={isAuthenticated ? logout : login}
+                      className="mt-2 flex w-full items-center space-x-2 rounded-lg bg-[#3db4f2]/15 px-3 py-2 text-xs font-semibold text-[#3db4f2] hover:bg-[#3db4f2]/20"
+                    >
+                      {isAuthenticated ? <LogOut size={16} /> : <LogIn size={16} />}
+                      <span>{isAuthenticated ? 'Logout' : 'Login with AniList'}</span>
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -121,42 +136,85 @@ const App: React.FC = () => {
                 />
               </button>
             </div>
-
-            <div className="rounded-xl bg-[#151f2e]/80 p-4 text-xs text-gray-400">
-              Desktop view inspired by mobile layout
-            </div>
           </div>
         </aside>
 
         <div className="relative flex-1 overflow-hidden">
-          {/* Dynamic Page Content */}
           <main className="flex-1 overflow-hidden h-full">
-            {renderContent()}
+            <Outlet />
           </main>
 
-          {/* Bottom Navigation */}
           <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md h-20 bg-[#0b1622] flex items-center justify-around px-2 border-t border-gray-900/50 z-50 lg:hidden">
             {tabs.map((tab) => (
               <button
                 key={`mobile-${tab.id}`}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => navigate(tab.path)}
                 className={`flex flex-col items-center justify-center space-y-1 w-full h-full transition-all duration-300 ${
-                  activeTab === tab.id ? 'text-[#3db4f2]' : 'text-gray-600'
+                  isActive(tab.path) ? 'text-[#3db4f2]' : 'text-gray-600'
                 }`}
               >
-                <div className={`${activeTab === tab.id ? 'bg-[#3db4f2]/10 p-2 rounded-full ring-4 ring-[#3db4f2]/5' : ''}`}>
-                  {activeTab === tab.id ? tab.activeIcon : tab.icon}
+                <div className={`${isActive(tab.path) ? 'bg-[#3db4f2]/10 p-2 rounded-full ring-4 ring-[#3db4f2]/5' : ''}`}>
+                  {isActive(tab.path) ? tab.activeIcon : tab.icon}
                 </div>
-                <span className={`text-[9px] font-black uppercase tracking-widest ${activeTab === tab.id ? 'opacity-100' : 'opacity-60'}`}>
+                <span className={`text-[9px] font-black uppercase tracking-widest ${isActive(tab.path) ? 'opacity-100' : 'opacity-60'}`}>
                   {tab.label}
                 </span>
               </button>
             ))}
           </nav>
         </div>
+
+        {isWatchlistRoute && <RightSidebar />}
       </div>
     </div>
   );
 };
+
+const AuthCallbackPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { loading, isAuthenticated, login } = useAuth();
+
+  React.useEffect(() => {
+    if (loading) return;
+    if (isAuthenticated) {
+      navigate('/dashboard/watchlist', { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate]);
+
+  return (
+    <div className="flex h-screen w-screen items-center justify-center bg-[#0b1622] px-6 text-[#f0f1f1]">
+      <div className="max-w-md rounded-xl border border-[#24354a] bg-[#151f2e]/90 p-6 text-center">
+        <h2 className="text-xl font-bold">Completing AniList Sign-In</h2>
+        <p className="mt-2 text-sm text-gray-400">
+          {loading
+            ? 'Please wait while we finish authentication.'
+            : 'Sign-in was not completed. Please try again.'}
+        </p>
+        {!loading && (
+          <button
+            onClick={login}
+            className="mt-4 rounded-lg bg-[#3db4f2]/20 px-4 py-2 text-sm font-semibold text-[#3db4f2] hover:bg-[#3db4f2]/30"
+          >
+            Login with AniList
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const App: React.FC = () => (
+  <Routes>
+    <Route path="/auth/callback" element={<AuthCallbackPage />} />
+    <Route path="/" element={<Navigate to="/dashboard/watchlist" replace />} />
+    <Route path="/dashboard" element={<DashboardLayout />}>
+      <Route index element={<Navigate to="watchlist" replace />} />
+      <Route path="watchlist" element={<Watchlist />} />
+      <Route path="discover" element={<Discover />} />
+      <Route path="profile" element={<Profile />} />
+    </Route>
+    <Route path="*" element={<Navigate to="/dashboard/watchlist" replace />} />
+  </Routes>
+);
 
 export default App;
