@@ -17,6 +17,22 @@ import {
 import { useAuth } from '@/auth/AuthContext';
 
 type FeedTab = 'activities' | 'notifications';
+type FeedCache = {
+  userId: number;
+  activities: ActivityFeedItem[];
+  notifications: NotificationFeedItem[];
+  activitiesAt: number;
+  notificationsAt: number;
+};
+
+const feedCache: FeedCache = {
+  userId: -1,
+  activities: [],
+  notifications: [],
+  activitiesAt: 0,
+  notificationsAt: 0,
+};
+const CACHE_TTL_MS = 2 * 60 * 1000;
 
 const timeAgo = (epochSeconds?: number) => {
   if (!epochSeconds) {
@@ -89,14 +105,30 @@ const RightSidebar: React.FC = () => {
     }
 
     let isMounted = true;
+    const now = Date.now();
+    const sameUser = feedCache.userId === viewer.id;
+
+    if (sameUser && feedCache.activities.length > 0 && now - feedCache.activitiesAt < CACHE_TTL_MS) {
+      setActivities(feedCache.activities);
+      setLoadingActivities(false);
+      setActivitiesError(null);
+    }
+    if (sameUser && feedCache.notifications.length > 0 && now - feedCache.notificationsAt < CACHE_TTL_MS) {
+      setNotifications(feedCache.notifications);
+      setLoadingNotifications(false);
+      setNotificationsError(null);
+    }
 
     const loadActivities = async () => {
       setLoadingActivities(true);
       setActivitiesError(null);
       try {
-        const data = await fetchRecentActivities(viewer.id, 20);
+        const data = await fetchRecentActivities(viewer.id, 10);
         if (isMounted) {
           setActivities(data);
+          feedCache.userId = viewer.id;
+          feedCache.activities = data;
+          feedCache.activitiesAt = Date.now();
         }
       } catch (err) {
         if (isMounted) {
@@ -113,9 +145,12 @@ const RightSidebar: React.FC = () => {
       setLoadingNotifications(true);
       setNotificationsError(null);
       try {
-        const data = await fetchNotifications(20);
+        const data = await fetchNotifications(10);
         if (isMounted) {
           setNotifications(data);
+          feedCache.userId = viewer.id;
+          feedCache.notifications = data;
+          feedCache.notificationsAt = Date.now();
         }
       } catch (err) {
         if (isMounted) {
@@ -128,11 +163,20 @@ const RightSidebar: React.FC = () => {
       }
     };
 
-    void Promise.all([loadActivities(), loadNotifications()]);
+    if (activeTab === 'activities') {
+      if (!(sameUser && feedCache.activities.length > 0 && now - feedCache.activitiesAt < CACHE_TTL_MS)) {
+        void loadActivities();
+      }
+    } else {
+      if (!(sameUser && feedCache.notifications.length > 0 && now - feedCache.notificationsAt < CACHE_TTL_MS)) {
+        void loadNotifications();
+      }
+    }
+
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, viewer]);
+  }, [activeTab, isAuthenticated, viewer]);
 
   return (
     <aside className="flex h-[45vh] flex-col border-t border-[#24354a] bg-[#111f30]/80 lg:h-auto lg:w-96 lg:border-l lg:border-t-0">
@@ -161,7 +205,7 @@ const RightSidebar: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="feed-scroll flex-1 overflow-y-auto p-4 space-y-3">
         {!isAuthenticated && (
           <div className="rounded-xl border border-[#24354a] bg-[#151f2e]/90 p-4">
             <p className="text-sm font-semibold text-gray-100">Connect AniList</p>

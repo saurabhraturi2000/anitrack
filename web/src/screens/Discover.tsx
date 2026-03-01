@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from "react";
+import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
 import {
   DiscoverFilters,
   DiscoverMediaItem,
   fetchDiscoverSections,
   fetchGenres,
-} from '@/services/anilist';
+} from "@/services/anilist";
 
 type FilterState = {
   search: string;
@@ -23,12 +23,12 @@ const Discover: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>({
-    search: '',
-    genre: '',
-    year: '',
-    season: '',
-    format: '',
-    status: '',
+    search: "",
+    genre: "",
+    year: "",
+    season: "",
+    format: "",
+    status: "",
   });
 
   useEffect(() => {
@@ -52,19 +52,19 @@ const Discover: React.FC = () => {
   const mappedFilters = useMemo<DiscoverFilters>(() => {
     const yearNum = Number(filters.year);
     return {
-      type: 'ANIME',
+      type: "ANIME",
       search: filters.search.trim() || undefined,
       genre: filters.genre || undefined,
       year: Number.isFinite(yearNum) && yearNum > 0 ? yearNum : undefined,
-      season: (filters.season || undefined) as DiscoverFilters['season'],
-      format: (filters.format || undefined) as DiscoverFilters['format'],
-      status: (filters.status || undefined) as DiscoverFilters['status'],
+      season: (filters.season || undefined) as DiscoverFilters["season"],
+      format: (filters.format || undefined) as DiscoverFilters["format"],
+      status: (filters.status || undefined) as DiscoverFilters["status"],
     };
   }, [filters]);
 
   const debouncedFilters = useMemo(() => mappedFilters, [mappedFilters]);
 
-  const [queryKey, setQueryKey] = useState('');
+  const [queryKey, setQueryKey] = useState("");
   useEffect(() => {
     const timer = setTimeout(() => {
       setQueryKey(JSON.stringify(debouncedFilters));
@@ -80,14 +80,19 @@ const Discover: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const sections = await fetchDiscoverSections(JSON.parse(queryKey) as DiscoverFilters, 6);
+        const sections = await fetchDiscoverSections(
+          JSON.parse(queryKey) as DiscoverFilters,
+          6,
+        );
 
         if (!isActive) return;
         setTrending(sections.trending);
         setPopular(sections.popular);
       } catch (err) {
         if (!isActive) return;
-        setError(err instanceof Error ? err.message : 'Failed to load discover data.');
+        setError(
+          err instanceof Error ? err.message : "Failed to load discover data.",
+        );
       } finally {
         if (isActive) setLoading(false);
       }
@@ -107,7 +112,9 @@ const Discover: React.FC = () => {
     <div key={item.id} className="min-w-0">
       <div className="aspect-[3/4] overflow-hidden rounded bg-[#12263f]">
         <img
-          src={item.image || 'https://placehold.co/360x480/12263f/eaf4ff?text=Ani'}
+          src={
+            item.image || "https://placehold.co/360x480/12263f/eaf4ff?text=Ani"
+          }
           alt={item.title}
           className="h-full w-full object-cover"
         />
@@ -115,10 +122,12 @@ const Discover: React.FC = () => {
       <div className="mt-2 flex items-start gap-2">
         <span
           className={`mt-1 inline-block h-3 w-3 shrink-0 rounded-full ${
-            item.status === 'RELEASING' ? 'bg-[#f2a166]' : 'bg-[#3db4f2]'
+            item.status === "RELEASING" ? "bg-[#f2a166]" : "bg-[#3db4f2]"
           }`}
         />
-        <p className="line-clamp-2 text-sm leading-5 text-[#9ec2e5]">{item.title}</p>
+        <p className="line-clamp-2 text-sm leading-5 text-[#9ec2e5]">
+          {item.title}
+        </p>
       </div>
     </div>
   );
@@ -136,16 +145,18 @@ const Discover: React.FC = () => {
   );
 
   return (
-    <div className="h-full overflow-y-auto bg-[#06162b] px-7 pb-24 pt-8 text-[#eaf4ff] lg:px-10 lg:pb-10">
+    <div className="h-full overflow-y-auto bg-[#0b1622] px-7 pb-24 pt-8 text-[#f0f1f1] lg:px-10 lg:pb-10">
       <div className="mx-auto w-full max-w-[1280px]">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3 xl:grid-cols-7">
           <div className="xl:col-span-1">
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-[#9cc2e5]">Search</label>
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-[#9cc2e5]">
+              Search
+            </label>
             <div className="flex items-center rounded bg-[#11243f] px-3">
               <Search size={15} className="text-[#5a7ea3]" />
               <input
                 value={filters.search}
-                onChange={(e) => handleFilterChange('search', e.target.value)}
+                onChange={(e) => handleFilterChange("search", e.target.value)}
                 placeholder="Search"
                 className="w-full bg-transparent px-2 py-3 text-sm text-[#d6e9ff] outline-none placeholder:text-[#5a7ea3]"
               />
@@ -153,27 +164,58 @@ const Discover: React.FC = () => {
           </div>
 
           {[
-            { key: 'genre', label: 'Genres', options: ['Any', ...genres] },
-            { key: 'year', label: 'Year', options: ['Any', '2026', '2025', '2024', '2023', '2022'] },
-            { key: 'season', label: 'Season', options: ['Any', 'WINTER', 'SPRING', 'SUMMER', 'FALL'] },
+            { key: "genre", label: "Genres", options: ["Any", ...genres] },
             {
-              key: 'format',
-              label: 'Format',
-              options: ['Any', 'TV', 'TV_SHORT', 'MOVIE', 'ONA', 'OVA', 'SPECIAL', 'MUSIC'],
+              key: "year",
+              label: "Year",
+              options: ["Any", "2026", "2025", "2024", "2023", "2022"],
             },
             {
-              key: 'status',
-              label: 'Airing Status',
-              options: ['Any', 'RELEASING', 'FINISHED', 'NOT_YET_RELEASED', 'HIATUS', 'CANCELLED'],
+              key: "season",
+              label: "Season",
+              options: ["Any", "WINTER", "SPRING", "SUMMER", "FALL"],
+            },
+            {
+              key: "format",
+              label: "Format",
+              options: [
+                "Any",
+                "TV",
+                "TV_SHORT",
+                "MOVIE",
+                "ONA",
+                "OVA",
+                "SPECIAL",
+                "MUSIC",
+              ],
+            },
+            {
+              key: "status",
+              label: "Airing Status",
+              options: [
+                "Any",
+                "RELEASING",
+                "FINISHED",
+                "NOT_YET_RELEASED",
+                "HIATUS",
+                "CANCELLED",
+              ],
             },
           ].map((item) => (
             <div key={item.key} className="xl:col-span-1">
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-[#9cc2e5]">{item.label}</label>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-widest text-[#9cc2e5]">
+                {item.label}
+              </label>
               <div className="relative">
                 <select
-                  value={(filters[item.key as keyof FilterState] || 'Any') as string}
+                  value={
+                    (filters[item.key as keyof FilterState] || "Any") as string
+                  }
                   onChange={(e) =>
-                    handleFilterChange(item.key as keyof FilterState, e.target.value === 'Any' ? '' : e.target.value)
+                    handleFilterChange(
+                      item.key as keyof FilterState,
+                      e.target.value === "Any" ? "" : e.target.value,
+                    )
                   }
                   className="w-full appearance-none rounded bg-[#11243f] px-4 py-3 text-sm text-[#9ec2e5] outline-none"
                 >
@@ -183,7 +225,10 @@ const Discover: React.FC = () => {
                     </option>
                   ))}
                 </select>
-                <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#5a7ea3]" />
+                <ChevronDown
+                  size={16}
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#5a7ea3]"
+                />
               </div>
             </div>
           ))}
@@ -200,22 +245,44 @@ const Discover: React.FC = () => {
 
         <section className="mt-12">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-2xl font-bold uppercase tracking-wide text-[#b8d5f2]">Trending Now</h2>
-            <button className="text-sm font-semibold text-[#8fb4d8] hover:text-[#b8d5f2]">View All</button>
+            <h2 className="text-2xl font-bold uppercase tracking-wide text-[#b8d5f2]">
+              Trending Now
+            </h2>
+            <button className="text-sm font-semibold text-[#8fb4d8] hover:text-[#b8d5f2]">
+              View All
+            </button>
           </div>
-          {loading ? renderSkeletonRow('trend') : <div className="grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-6">{trending.map(renderCard)}</div>}
+          {loading ? (
+            renderSkeletonRow("trend")
+          ) : (
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-6">
+              {trending.map(renderCard)}
+            </div>
+          )}
         </section>
 
         <section className="mt-12">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-2xl font-bold uppercase tracking-wide text-[#b8d5f2]">Popular This Season</h2>
-            <button className="text-sm font-semibold text-[#8fb4d8] hover:text-[#b8d5f2]">View All</button>
+            <h2 className="text-2xl font-bold uppercase tracking-wide text-[#b8d5f2]">
+              Popular This Season
+            </h2>
+            <button className="text-sm font-semibold text-[#8fb4d8] hover:text-[#b8d5f2]">
+              View All
+            </button>
           </div>
-          {loading ? renderSkeletonRow('pop') : <div className="grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-6">{popular.map(renderCard)}</div>}
+          {loading ? (
+            renderSkeletonRow("pop")
+          ) : (
+            <div className="grid grid-cols-2 gap-5 md:grid-cols-3 xl:grid-cols-6">
+              {popular.map(renderCard)}
+            </div>
+          )}
         </section>
 
         {!loading && error && (
-          <p className="mt-6 text-sm text-red-400">Failed to load discover data: {error}</p>
+          <p className="mt-6 text-sm text-red-400">
+            Failed to load discover data: {error}
+          </p>
         )}
       </div>
     </div>

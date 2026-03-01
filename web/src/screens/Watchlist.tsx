@@ -16,6 +16,7 @@ type CacheEntry = {
   phase: FeedPhase;
   releasingPage: number;
   finishedPage: number;
+  updatedAt: number;
 };
 
 const watchlistFeedCache: Partial<Record<'ANIME' | 'MANGA', CacheEntry>> = {};
@@ -42,6 +43,7 @@ const Watchlist: React.FC = () => {
   const [pullDistance, setPullDistance] = useState(0);
   const [pulling, setPulling] = useState(false);
   const loadingRef = useRef(false);
+  const lastLoadAtRef = useRef(0);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const touchStartYRef = useRef(0);
   const pullThreshold = 78;
@@ -68,6 +70,7 @@ const Watchlist: React.FC = () => {
       phase,
       releasingPage,
       finishedPage,
+      updatedAt: Date.now(),
     };
   }, [finishedData, finishedPage, loadedType, phase, releasingData, releasingPage, viewer]);
 
@@ -80,8 +83,10 @@ const Watchlist: React.FC = () => {
       if (!isAuthenticated || !viewer) return;
       if (loadingRef.current) return;
       if (mode !== 'initial' && phase === 'done') return;
+      if (mode === 'more' && Date.now() - lastLoadAtRef.current < 350) return;
 
       loadingRef.current = true;
+      lastLoadAtRef.current = Date.now();
       if (mode === 'initial') setInitialLoading(true);
       else setLoadingMore(true);
       setWatchlistError(null);
@@ -92,36 +97,36 @@ const Watchlist: React.FC = () => {
         const baseFinishedPage = mode === 'initial' ? 0 : finishedPage;
 
         if (activePhase === 'releasing') {
-          const nextPage = baseReleasingPage + 1;
-          const releasingResult = await fetchWatchlistPage({
-            userId: viewer.id,
-            type: contentType,
-            phase: 'releasing',
-            page: nextPage,
-            perPage: 15,
-          });
+          let pageCursor = baseReleasingPage;
+          let hasNextPage = true;
+          let collected: CurrentListItem[] = [];
+          const lookaheadLimit = mode === 'initial' ? 4 : 2;
+          let lookahead = 0;
 
-          setReleasingData((prev) => appendUnique(prev, releasingResult.items));
-          setReleasingPage(nextPage);
-          setLoadedType(contentType);
-
-          if (releasingResult.hasNextPage) {
-            setPhase('releasing');
-          } else {
-            // After current releasing is exhausted, automatically begin finished pages.
-            const nextFinishedPage = 1;
-            const finishedResult = await fetchWatchlistPage({
+          while (hasNextPage && collected.length === 0 && lookahead < lookaheadLimit) {
+            const nextPage = pageCursor + 1;
+            const releasingResult = await fetchWatchlistPage({
               userId: viewer.id,
               type: contentType,
-              phase: 'finished',
-              page: nextFinishedPage,
+              phase: 'releasing',
+              page: nextPage,
               perPage: 15,
             });
 
-            setFinishedData((prev) => appendUnique(prev, finishedResult.items));
-            setFinishedPage(nextFinishedPage);
-            setPhase(finishedResult.hasNextPage ? 'finished' : 'done');
-            setLoadedType(contentType);
+            pageCursor = nextPage;
+            hasNextPage = releasingResult.hasNextPage;
+            collected = appendUnique(collected, releasingResult.items);
+            lookahead += 1;
+          }
+
+          setReleasingData((prev) => appendUnique(prev, collected));
+          setReleasingPage(pageCursor);
+          setLoadedType(contentType);
+
+          if (hasNextPage) {
+            setPhase('releasing');
+          } else {
+            setPhase('finished');
           }
           return;
         }
@@ -172,7 +177,9 @@ const Watchlist: React.FC = () => {
     }
 
     const cached = watchlistFeedCache[contentType];
-    if (cached && cached.userId === viewer.id) {
+    const hasAnyCachedItems = (cached?.releasingData.length || 0) + (cached?.finishedData.length || 0) > 0;
+    const cacheIsFresh = cached ? Date.now() - cached.updatedAt < 2 * 60 * 1000 : false;
+    if (cached && cached.userId === viewer.id && cacheIsFresh && hasAnyCachedItems) {
       setReleasingData(cached.releasingData);
       setFinishedData(cached.finishedData);
       setPhase(cached.phase);
@@ -188,17 +195,6 @@ const Watchlist: React.FC = () => {
     resetFeed();
     void loadNextPage('initial');
   }, [contentType, isAuthenticated, viewer, resetFeed, loadNextPage]);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    if (!isAuthenticated || !viewer) return;
-    if (initialLoading || loadingMore || phase === 'done') return;
-
-    if (el.scrollHeight <= el.clientHeight + 40) {
-      void loadNextPage('more');
-    }
-  }, [finishedData, initialLoading, isAuthenticated, loadingMore, loadNextPage, phase, releasingData, viewer]);
 
   const onScroll = () => {
     const el = scrollRef.current;
@@ -300,6 +296,24 @@ const Watchlist: React.FC = () => {
     </div>
   );
 
+  if (!isAuthenticated) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center bg-[#0b1622] px-6 text-[#f0f1f1]">
+        <h2 className="text-2xl font-bold">Connect AniList</h2>
+        <p className="mt-2 text-center text-sm text-gray-400">
+          Sign in to sync your watchlist, activities, and notifications.
+        </p>
+        {authError && <p className="mt-2 text-center text-xs text-red-400">{authError}</p>}
+        <button
+          onClick={login}
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#3db4f2]/20 px-4 py-2 text-sm font-semibold text-[#3db4f2] hover:bg-[#3db4f2]/30"
+        >
+          Login with AniList
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex flex-col h-full bg-[#0b1622] text-[#f0f1f1]">
       <div className="flex items-center justify-between px-6 pt-6 pb-2">
@@ -350,60 +364,42 @@ const Watchlist: React.FC = () => {
             </p>
           </div>
         )}
-        {!isAuthenticated && (
-          <div className="max-w-md mx-auto rounded-xl border border-[#24354a] bg-[#151f2e]/90 p-5">
-            <h3 className="text-lg font-bold">Connect AniList</h3>
-            <p className="mt-2 text-sm text-gray-400">
-              Login to load your watchlist, activities, and notifications.
-            </p>
-            {authError && <p className="mt-2 text-xs text-red-400">{authError}</p>}
-            <button
-              onClick={login}
-              className="mt-4 rounded-lg bg-[#3db4f2]/20 px-4 py-2 text-sm font-semibold text-[#3db4f2] hover:bg-[#3db4f2]/30"
-            >
-              Login with AniList
-            </button>
+        <div className="space-y-6">
+          <div className="flex items-center justify-center space-x-2 text-[#3db4f2] mb-2">
+            <Tv size={24} />
+            <span className="font-bold tracking-widest">RELEASING</span>
           </div>
-        )}
-
-        {isAuthenticated && (
           <div className="space-y-6">
-            <div className="flex items-center justify-center space-x-2 text-[#3db4f2] mb-2">
-              <Tv size={24} />
-              <span className="font-bold tracking-widest">RELEASING</span>
-            </div>
-            <div className="space-y-6">
-              {initialLoading
-                ? Array.from({ length: 3 }, (_, i) => renderSkeletonItem(`releasing-skeleton-${i}`))
-                : releasingData.map(renderWatchItem)}
-              {!initialLoading && !watchlistError && releasingData.length === 0 && (
-                <p className="text-xs text-gray-500">No releasing titles found.</p>
-              )}
-            </div>
-
-            <div className="flex items-center justify-center space-x-2 text-[#3db4f2] mb-2">
-              <Check size={20} />
-              <span className="font-bold tracking-widest">FINISHED</span>
-            </div>
-            <div className="space-y-6">
-              {initialLoading
-                ? Array.from({ length: 2 }, (_, i) => renderSkeletonItem(`finished-skeleton-${i}`))
-                : finishedData.map(renderWatchItem)}
-              {!initialLoading && !watchlistError && finishedData.length === 0 && phase !== 'releasing' && (
-                <p className="text-xs text-gray-500">No finished titles found.</p>
-              )}
-              {watchlistError && <p className="text-xs text-red-400">Failed to load watchlist: {watchlistError}</p>}
-              {loadingMore && (
-                <div className="space-y-4">
-                  {Array.from({ length: 2 }, (_, i) => renderSkeletonItem(`load-more-${i}`))}
-                </div>
-              )}
-              {!loadingMore && phase === 'done' && (
-                <p className="text-xs text-gray-500 text-center pt-2">You have reached the end.</p>
-              )}
-            </div>
+            {initialLoading
+              ? Array.from({ length: 3 }, (_, i) => renderSkeletonItem(`releasing-skeleton-${i}`))
+              : releasingData.map(renderWatchItem)}
+            {!initialLoading && !watchlistError && releasingData.length === 0 && (
+              <p className="text-xs text-gray-500">No releasing titles found.</p>
+            )}
           </div>
-        )}
+
+          <div className="flex items-center justify-center space-x-2 text-[#3db4f2] mb-2">
+            <Check size={20} />
+            <span className="font-bold tracking-widest">FINISHED</span>
+          </div>
+          <div className="space-y-6">
+            {initialLoading
+              ? Array.from({ length: 2 }, (_, i) => renderSkeletonItem(`finished-skeleton-${i}`))
+              : finishedData.map(renderWatchItem)}
+            {!initialLoading && !watchlistError && finishedData.length === 0 && phase !== 'releasing' && (
+              <p className="text-xs text-gray-500">No finished titles found.</p>
+            )}
+            {watchlistError && <p className="text-xs text-red-400">Failed to load watchlist: {watchlistError}</p>}
+            {loadingMore && (
+              <div className="space-y-4">
+                {Array.from({ length: 2 }, (_, i) => renderSkeletonItem(`load-more-${i}`))}
+              </div>
+            )}
+            {!loadingMore && phase === 'done' && (
+              <p className="text-xs text-gray-500 text-center pt-2">You have reached the end.</p>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

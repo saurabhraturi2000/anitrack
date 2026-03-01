@@ -164,7 +164,7 @@ const DashboardLayout: React.FC = () => {
           </nav>
         </div>
 
-        {isWatchlistRoute && <RightSidebar />}
+        {isWatchlistRoute && isAuthenticated && <RightSidebar />}
       </div>
     </div>
   );

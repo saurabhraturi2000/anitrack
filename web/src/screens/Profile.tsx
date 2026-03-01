@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ChevronDown, Heart, LogIn, LogOut, MessageCircle } from "lucide-react";
 import { useAuth } from "@/auth/AuthContext";
 import { fetchProfileOverview, ProfileOverviewData } from "@/services/anilist";
+import ProfileAnimeTab from "@/components/profile/ProfileAnimeTab";
 
 type ProfileTabKey =
   | "overview"
@@ -171,7 +172,7 @@ const Profile: React.FC = () => {
   );
 
   return (
-    <div className="profile-scroll h-full overflow-y-auto bg-[#051325] text-[#eaf4ff]">
+    <div className="profile-scroll h-full overflow-y-auto bg-[#0b1622] text-[#f0f1f1]">
       <div className="relative h-64 w-full overflow-hidden">
         <img
           src={
@@ -215,17 +216,18 @@ const Profile: React.FC = () => {
               </button>
             ))}
           </div>
-          <button
+          {/* <button
             onClick={logout}
             className="mb-2 mt-2 inline-flex items-center gap-2 rounded-md bg-[#132844] px-3 py-2 text-xs font-semibold text-[#8db4dc] hover:bg-[#1a3352]"
           >
             <LogOut size={14} />
             Logout
-          </button>
+          </button> */}
         </div>
       </div>
 
-      {activeTab !== "overview" && renderMockTab()}
+      {activeTab === "anime-list" && viewer && <ProfileAnimeTab userId={viewer.id} />}
+      {activeTab !== "overview" && activeTab !== "anime-list" && renderMockTab()}
 
       {activeTab === "overview" && (
         <div className="mx-auto grid w-full max-w-[1280px] grid-cols-1 gap-6 px-6 py-6 xl:grid-cols-[44%_56%]">

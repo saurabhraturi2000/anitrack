@@ -726,10 +726,7 @@ export const fetchWatchlistPage = async (args: {
 
   const entries = data.Page?.mediaList || [];
   const mapped = mapCurrentListItems(entries, args.type);
-  const items =
-    args.phase === 'releasing'
-      ? mapped.filter((item) => item.status === 'RELEASING')
-      : mapped;
+  const items = mapped;
 
   return {
     items,
@@ -1289,6 +1286,131 @@ export interface ProfileOverviewData {
   activities: ProfileActivityItem[];
   historyTimestamps: number[];
 }
+
+export interface ProfileAnimeListItem {
+  id: string;
+  mediaId: number;
+  title: string;
+  image: string;
+  progress: number;
+  total: number;
+  format: string;
+  score: number;
+  status: 'CURRENT' | 'COMPLETED' | 'PAUSED' | 'DROPPED' | 'PLANNING' | 'REPEATING' | 'OTHER';
+}
+
+export interface ProfileAnimeListData {
+  all: ProfileAnimeListItem[];
+  watching: ProfileAnimeListItem[];
+  completed: ProfileAnimeListItem[];
+  paused: ProfileAnimeListItem[];
+  dropped: ProfileAnimeListItem[];
+  planning: ProfileAnimeListItem[];
+}
+
+type ProfileAnimeListResponse = {
+  MediaListCollection?: {
+    lists?: Array<{
+      entries?: Array<{
+        id: number;
+        progress?: number | null;
+        score?: number | null;
+        status?: string | null;
+        media?: {
+          id: number;
+          format?: string | null;
+          episodes?: number | null;
+          title?: {
+            english?: string | null;
+            romaji?: string | null;
+          } | null;
+          coverImage?: {
+            extraLarge?: string | null;
+            large?: string | null;
+          } | null;
+        } | null;
+      }> | null;
+    }> | null;
+  } | null;
+};
+
+export const fetchProfileAnimeList = async (userId: number): Promise<ProfileAnimeListData> => {
+  const query = `
+    query ProfileAnimeList($userId: Int) {
+      MediaListCollection(userId: $userId, type: ANIME) {
+        lists {
+          entries {
+            id
+            status
+            progress
+            score
+            media {
+              id
+              format
+              episodes
+              title {
+                english
+                romaji
+              }
+              coverImage {
+                extraLarge
+                large
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const data = await anilistRequest<ProfileAnimeListResponse>(
+    query,
+    { userId },
+    { authenticated: true }
+  );
+
+  const rawEntries =
+    data.MediaListCollection?.lists?.flatMap((list) => list.entries || []) || [];
+
+  const items: ProfileAnimeListItem[] = rawEntries
+    .filter((entry) => entry.media?.id)
+    .map((entry) => {
+      const statusRaw = entry.status || 'OTHER';
+      const status =
+        statusRaw === 'CURRENT' ||
+        statusRaw === 'COMPLETED' ||
+        statusRaw === 'PAUSED' ||
+        statusRaw === 'DROPPED' ||
+        statusRaw === 'PLANNING' ||
+        statusRaw === 'REPEATING'
+          ? statusRaw
+          : 'OTHER';
+
+      return {
+        id: String(entry.id),
+        mediaId: entry.media!.id,
+        title: entry.media?.title?.english || entry.media?.title?.romaji || 'Untitled',
+        image: entry.media?.coverImage?.extraLarge || entry.media?.coverImage?.large || '',
+        progress: entry.progress || 0,
+        total: entry.media?.episodes || 0,
+        format: entry.media?.format || '-',
+        score: entry.score || 0,
+        status,
+      };
+    });
+
+  const by = (status: ProfileAnimeListItem['status']) =>
+    items.filter((item) => item.status === status);
+
+  return {
+    all: items,
+    watching: by('CURRENT'),
+    completed: by('COMPLETED'),
+    paused: by('PAUSED'),
+    dropped: by('DROPPED'),
+    planning: by('PLANNING'),
+  };
+};
 
 type ProfileOverviewResponse = {
   User?: {
