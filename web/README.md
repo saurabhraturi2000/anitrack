@@ -18,7 +18,6 @@ View your app in AI Studio: https://ai.studio/apps/drive/1RQiT_uBvyv13-PoP3HeUh5
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Set AniList auth values in `.env.local`:
    - `VITE_ANILIST_CLIENT_ID=your_anilist_client_id`
-   - `VITE_ANILIST_REDIRECT_URI=http://localhost:3000/auth/callback`
 4. Run the app:
    `npm run dev`
 

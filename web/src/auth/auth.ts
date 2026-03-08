@@ -35,32 +35,6 @@ const ANILIST_GRAPHQL_URL = import.meta.env.DEV
 const getClientId = () =>
   import.meta.env.VITE_ANILIST_CLIENT_ID as string | undefined;
 
-const joinPath = (...parts: string[]) =>
-  parts
-    .map((part, index) => {
-      if (index === 0) {
-        return part.replace(/\/+$/g, '');
-      }
-
-      return part.replace(/^\/+|\/+$/g, '');
-    })
-    .filter(Boolean)
-    .join('/');
-
-const getRedirectUri = () => {
-  const configuredRedirectUri = (
-    import.meta.env.VITE_ANILIST_REDIRECT_URI as string | undefined
-  )?.trim();
-
-  if (configuredRedirectUri) {
-    return configuredRedirectUri;
-  }
-
-  const baseUrl = import.meta.env.BASE_URL || '/';
-  const callbackPath = joinPath(baseUrl, 'auth', 'callback');
-  return new URL(callbackPath, window.location.origin).toString();
-};
-
 export const getStoredSession = (): OAuthSession | null => {
   const token = localStorage.getItem(ACCESS_TOKEN_KEY);
   const expiresAtRaw = localStorage.getItem(EXPIRES_AT_KEY);
@@ -119,7 +93,6 @@ export const buildAuthorizeUrl = () => {
     client_id: clientId,
     response_type: "token",
     state,
-    redirect_uri: getRedirectUri(),
   });
 
   return `https://anilist.co/api/v2/oauth/authorize?${params.toString()}`;
