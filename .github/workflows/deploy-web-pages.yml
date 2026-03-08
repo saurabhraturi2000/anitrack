@@ -41,8 +41,18 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      - name: Validate required variables
+        run: |
+          if [ -z "${VITE_ANILIST_CLIENT_ID}" ]; then
+            echo "::error::Missing Actions variable VITE_ANILIST_CLIENT_ID. Add it in Settings > Secrets and variables > Actions > Variables."
+            exit 1
+          fi
+
       - name: Install dependencies
         run: npm ci
+
+      - name: Install Rollup Linux binary
+        run: npm install --no-save @rollup/rollup-linux-x64-gnu@$(node -p "require('./node_modules/rollup/package.json').version")
 
       - name: Build web app
         run: npm run build:pages
