@@ -17,6 +17,7 @@ import { Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react
 import Watchlist from '@/screens/Watchlist';
 import Discover from '@/screens/Discover';
 import Profile from '@/screens/Profile';
+import Landing from '@/screens/Landing';
 import RightSidebar from '@/components/RightSidebar';
 import { useAuth } from '@/auth/AuthContext';
 
@@ -214,7 +215,7 @@ const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
-      <Route path="/" element={<Navigate to={defaultDashboardPath} replace />} />
+      <Route path="/" element={<Landing />} />
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<Navigate to={isAuthenticated ? 'watchlist' : 'discover'} replace />} />
         <Route path="watchlist" element={<Watchlist />} />
