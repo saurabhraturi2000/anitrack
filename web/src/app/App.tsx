@@ -204,17 +204,26 @@ const AuthCallbackPage: React.FC = () => {
 };
 
 const App: React.FC = () => (
-  <Routes>
-    <Route path="/auth/callback" element={<AuthCallbackPage />} />
-    <Route path="/" element={<Navigate to="/dashboard/watchlist" replace />} />
-    <Route path="/dashboard" element={<DashboardLayout />}>
-      <Route index element={<Navigate to="watchlist" replace />} />
-      <Route path="watchlist" element={<Watchlist />} />
-      <Route path="discover" element={<Discover />} />
-      <Route path="profile" element={<Profile />} />
-    </Route>
-    <Route path="*" element={<Navigate to="/dashboard/watchlist" replace />} />
-  </Routes>
+  <AppRoutes />
 );
+
+const AppRoutes: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+  const defaultDashboardPath = isAuthenticated ? '/dashboard/watchlist' : '/dashboard/discover';
+
+  return (
+    <Routes>
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      <Route path="/" element={<Navigate to={defaultDashboardPath} replace />} />
+      <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route index element={<Navigate to={isAuthenticated ? 'watchlist' : 'discover'} replace />} />
+        <Route path="watchlist" element={<Watchlist />} />
+        <Route path="discover" element={<Discover />} />
+        <Route path="profile" element={<Profile />} />
+      </Route>
+      <Route path="*" element={<Navigate to={defaultDashboardPath} replace />} />
+    </Routes>
+  );
+};
 
 export default App;

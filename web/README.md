@@ -31,3 +31,21 @@ Register this redirect URL in your AniList developer app settings:
 For production, register your production callback URL too (same path is recommended):
 
 `https://your-domain.com/auth/callback`
+
+## GitHub Pages
+
+This repo includes a GitHub Pages workflow at `.github/workflows/deploy-web-pages.yml` for the `web` app.
+
+Before the first deployment:
+
+1. In GitHub, go to `Settings > Pages` and set `Source` to `GitHub Actions`.
+2. In `Settings > Secrets and variables > Actions > Variables`, add:
+   - `VITE_ANILIST_CLIENT_ID=your_anilist_client_id`
+3. In your AniList developer app, register this production callback URL:
+   - `https://saurabhraturi2000.github.io/anitrack/auth/callback`
+
+Deployments run automatically on pushes to `main` that touch `web/**` or the workflow file. You can also trigger the workflow manually from the Actions tab.
+
+Your GitHub Pages site URL for this repo will be:
+
+`https://saurabhraturi2000.github.io/anitrack/`
