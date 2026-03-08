@@ -5,11 +5,6 @@ import {
   User,
   Settings as SettingsIcon,
   ChevronDown,
-  Layout,
-  Bell,
-  Info,
-  Sliders,
-  List,
   LogOut,
   LogIn,
 } from 'lucide-react';
@@ -94,27 +89,10 @@ const DashboardLayout: React.FC = () => {
             <div className="relative">
               {settingsOpen && (
                 <div className="absolute bottom-full left-0 right-0 z-20 mb-2 rounded-xl border border-[#24354a] bg-[#151f2e]/95 p-3 space-y-1 shadow-2xl">
-                  {[
-                    { icon: <Layout size={16} />, label: 'Appearance' },
-                    { icon: <Bell size={16} />, label: 'Push Notifications' },
-                    { icon: <Info size={16} />, label: 'About' },
-                    { icon: <User size={16} />, label: 'AniList Profile' },
-                    { icon: <Sliders size={16} />, label: 'Content Preferences' },
-                    { icon: <List size={16} />, label: 'List Preferences' },
-                    { icon: <Bell size={16} />, label: 'AniList Notifications' },
-                  ].map((item) => (
-                    <button
-                      key={item.label}
-                      className="flex w-full items-center space-x-2 rounded-lg px-3 py-2 text-xs text-gray-300 hover:bg-[#0f1a27]"
-                    >
-                      <span className="text-[#3db4f2]">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </button>
-                  ))}
                   {!loading && (
                     <button
                       onClick={isAuthenticated ? logout : login}
-                      className="mt-2 flex w-full items-center space-x-2 rounded-lg bg-[#3db4f2]/15 px-3 py-2 text-xs font-semibold text-[#3db4f2] hover:bg-[#3db4f2]/20"
+                      className="flex w-full items-center space-x-2 rounded-lg bg-[#3db4f2]/15 px-3 py-2 text-xs font-semibold text-[#3db4f2] hover:bg-[#3db4f2]/20"
                     >
                       {isAuthenticated ? <LogOut size={16} /> : <LogIn size={16} />}
                       <span>{isAuthenticated ? 'Logout' : 'Login with AniList'}</span>
